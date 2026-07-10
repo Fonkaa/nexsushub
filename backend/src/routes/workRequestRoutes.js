@@ -1,5 +1,6 @@
 import express from "express";
 import verifyToken from "../middleware/authMiddleware.js";
+
 import {
     getWorkRequests,
     createWorkRequest,
@@ -11,15 +12,21 @@ import {
 const router = express.Router();
 
 
+// Get all requests
 router.get("/", verifyToken, getWorkRequests);
 
+
+// Create new request
 router.post("/", verifyToken, createWorkRequest);
 
 
-router.put("/:id", updateWorkRequest);
+// Update request status
+router.put("/:id", verifyToken, updateWorkRequest);
 
 
-router.delete("/:id", deleteWorkRequest);
+// Delete request
+router.delete("/:id", verifyToken, deleteWorkRequest);
+
 
 
 export default router;

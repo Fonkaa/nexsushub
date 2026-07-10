@@ -1,76 +1,123 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState } from "react";
+import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 
-function Login() {
-
-    const { login } = useContext(AuthContext);
+function Login(){
 
     const navigate = useNavigate();
 
 
-    const [email,setEmail] = useState("");
-    const [password,setPassword] = useState("");
+    const [form,setForm] = useState({
 
-    const [error,setError] = useState("");
+        email:"",
+        password:""
+
+    });
 
 
-    const handleSubmit = async (e)=>{
+
+    const handleChange = (e)=>{
+
+        setForm({
+
+            ...form,
+
+            [e.target.name]: e.target.value
+
+        });
+
+    };
+
+
+
+    const handleLogin = async(e)=>{
 
         e.preventDefault();
 
+
         try{
 
-            await login(email,password);
+            const res = await API.post("/auth/login", form);
+
+
+            localStorage.setItem(
+                "token",
+                res.data.token
+            );
+
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(res.data.user)
+            );
+
 
             navigate("/dashboard");
 
-        }catch(err){
 
-            setError(
-                err.response?.data?.message ||
-                "Login failed"
+        }catch(error){
+
+            console.log(
+                error.response?.data || error.message
             );
+
+            alert("Login failed");
 
         }
 
     };
 
 
-    return (
 
-        <div>
+    return(
 
-            <h2>Login</h2>
-
-
-            {error && (
-                <p>{error}</p>
-            )}
+        <div className="p-6">
 
 
-            <form onSubmit={handleSubmit}>
+            <h1 className="text-3xl font-bold">
+                Login
+            </h1>
+
+
+
+            <form onSubmit={handleLogin}>
 
 
                 <input
-                    type="email"
+
+                    name="email"
+
                     placeholder="Email"
-                    value={email}
-                    onChange={(e)=>setEmail(e.target.value)}
+
+                    value={form.email}
+
+                    onChange={handleChange}
+
                 />
+
 
 
                 <input
+
+                    name="password"
+
                     type="password"
+
                     placeholder="Password"
-                    value={password}
-                    onChange={(e)=>setPassword(e.target.value)}
+
+                    value={form.password}
+
+                    onChange={handleChange}
+
                 />
+
 
 
                 <button type="submit">
+
                     Login
+
                 </button>
 
 
@@ -80,6 +127,7 @@ function Login() {
         </div>
 
     );
+
 }
 
 

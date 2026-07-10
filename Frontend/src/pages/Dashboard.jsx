@@ -7,18 +7,21 @@ function Dashboard(){
     const [data, setData] = useState(null);
 
 
+
     useEffect(() => {
 
 
         API.get("/dashboard")
-        .then((response) => {
+
+        .then((response)=>{
 
             console.log("API RESPONSE:", response.data);
 
             setData(response.data);
 
         })
-        .catch((error) => {
+
+        .catch((error)=>{
 
             console.log("API ERROR:", error);
 
@@ -29,29 +32,37 @@ function Dashboard(){
 
 
 
+
     return (
 
-        <div>
+        <div className="p-6">
 
-            <h1>NexusHub Dashboard</h1>
+
+            <h1 className="text-3xl font-bold">
+                NexusHub Dashboard
+            </h1>
+
 
 
             {
                 data ? (
 
-                    <div>
+                    <div className="mt-5">
 
-                        <h2>
+
+                        <h2 className="text-xl font-bold">
                             {data.message}
                         </h2>
 
 
-                        <hr />
+                        <hr className="my-4"/>
 
 
-                        <h3>
+
+                        <h3 className="text-xl font-bold">
                             User Profile
                         </h3>
+
 
 
                         <p>
@@ -59,9 +70,11 @@ function Dashboard(){
                         </p>
 
 
+
                         <p>
                             <strong>Name:</strong> {data.user.name}
                         </p>
+
 
 
                         <p>
@@ -69,9 +82,11 @@ function Dashboard(){
                         </p>
 
 
+
                         <p>
                             <strong>Email:</strong> {data.user.email}
                         </p>
+
 
 
                         <p>
@@ -79,16 +94,20 @@ function Dashboard(){
                         </p>
 
 
+
                         <p>
                             <strong>Joined:</strong> {data.user.created_at}
                         </p>
+
 
 
                     </div>
 
 
                 )
+
                 :
+
                 (
 
                     <p>
@@ -96,7 +115,9 @@ function Dashboard(){
                     </p>
 
                 )
+
             }
+
 
 
         </div>
