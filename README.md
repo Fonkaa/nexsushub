@@ -29,3 +29,18 @@ NexusHub is a web-based operations management system designed to help organizati
 - Multer (Image Upload)
 
 ## Project Structure
+NexusHub/
+│
+├── frontend/ # React application
+│
+└── backend/ # Express API server
+
+
+## Setup Instructions
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm run dev
