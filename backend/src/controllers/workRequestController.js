@@ -4,29 +4,33 @@ import db from "../config/db.js";
 // Get all work requests
 export const getWorkRequests = (req, res) => {
 
-    const sql = `
-        SELECT 
-            work_requests.*,
-            users.name AS requester_name
-        FROM work_requests
-        JOIN users 
-        ON work_requests.requester_id = users.id
-        ORDER BY work_requests.created_at DESC
-    `;
+   const sql = `
+SELECT 
+    work_requests.*,
+
+    users.name AS requester_name,
+
+    team_members.full_name AS assigned_name
+
+FROM work_requests
+
+JOIN users 
+ON work_requests.requester_id = users.id
+
+LEFT JOIN team_members
+ON work_requests.assigned_to = team_members.id
+
+ORDER BY work_requests.created_at DESC
+`;
 
 
     db.query(sql, (err, result) => {
 
         if (err) {
 
-            console.log("GET REQUEST ERROR:", err);
-
-            return res.status(500).json({
-                message: err.message
-            });
+            return res.status(500).json(err);
 
         }
-
 
         res.json(result);
 
@@ -117,21 +121,17 @@ export const createWorkRequest = (req, res) => {
 // Update request status and assigned user
 export const updateWorkRequest = (req, res) => {
 
-
     const { id } = req.params;
 
 
-    const {
-        status,
-        assigned_to
-    } = req.body;
+    const { status } = req.body;
 
 
 
     const sql = `
         UPDATE work_requests
-        SET status=?, assigned_to=?
-        WHERE id=?
+        SET status = ?
+        WHERE id = ?
     `;
 
 
@@ -140,15 +140,19 @@ export const updateWorkRequest = (req, res) => {
         sql,
         [
             status,
-            assigned_to,
             id
         ],
-        (err, result) => {
+
+        (err,result)=>{
 
 
-            if (err) {
+            if(err){
 
-                console.log("UPDATE REQUEST ERROR:", err);
+                console.log(
+                    "UPDATE REQUEST ERROR:",
+                    err
+                );
+
 
                 return res.status(500).json({
                     message: err.message
@@ -160,7 +164,7 @@ export const updateWorkRequest = (req, res) => {
 
             res.json({
 
-                message: "Request updated successfully"
+                message:"Request status updated successfully"
 
             });
 
@@ -168,8 +172,8 @@ export const updateWorkRequest = (req, res) => {
         }
     );
 
-};
 
+};
 
 
 
@@ -215,6 +219,74 @@ export const deleteWorkRequest = (req, res) => {
 
 
         }
+    );
+
+};
+// Assign request to team member
+export const assignRequest = (req, res) => {
+
+    const { id } = req.params;
+
+    const { assigned_to } = req.body;
+
+
+
+    if(!assigned_to){
+
+        return res.status(400).json({
+
+            message:"Team member is required"
+
+        });
+
+    }
+
+
+
+    const sql = `
+        UPDATE work_requests
+        SET assigned_to=?
+        WHERE id=?
+    `;
+
+
+
+    db.query(
+
+        sql,
+
+        [
+            assigned_to,
+            id
+        ],
+
+        (err,result)=>{
+
+
+            if(err){
+
+                console.log("ASSIGN ERROR:",err);
+
+
+                return res.status(500).json({
+
+                    message:"Assignment failed"
+
+                });
+
+            }
+
+
+
+            res.json({
+
+                message:"Request assigned successfully"
+
+            });
+
+
+        }
+
     );
 
 };

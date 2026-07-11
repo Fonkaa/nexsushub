@@ -47,28 +47,31 @@ export const register = (req, res) => {
             const hashedPassword = bcrypt.hashSync(password, 10);
 
 
-            const sql = `
-                INSERT INTO users
-                (name, username, email, password)
-                VALUES (?, ?, ?, ?)
-            `;
+  const sql = `
+    INSERT INTO users
+    (name, username, email, password, role)
+    VALUES (?, ?, ?, ?, ?)
+`;
 
 
             db.query(
                 sql,
                 [
-                    name,
-                    username,
-                    email,
-                    hashedPassword
-                ],
+        name,
+        username,
+        email,
+        hashedPassword,
+        "employee"
+    ],
                 (err, result) => {
 
                     if (err) {
                         return res.status(500).json({
                             message: "User registration failed",
                             error: err
+                            
                         });
+                        console.log(err.sql);
                     }
 
 

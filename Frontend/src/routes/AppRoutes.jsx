@@ -8,7 +8,7 @@ import WorkRequests from "../pages/WorkRequests";
 import Resources from "../pages/Resources";
 import Statistics from "../pages/Statistics";
 
-
+import { Register } from "../pages/Register.jsx";
 import MainLayout from "../layouts/MainLayout";
 
 
@@ -28,7 +28,10 @@ return (
 path="/"
 element={<Login />}
 />
-
+<Route
+    path="/register"
+    element={<Register />}
+/>
 <Route
 path="/dashboard"
 element={

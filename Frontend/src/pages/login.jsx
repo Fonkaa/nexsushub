@@ -35,7 +35,14 @@ function Login(){
 
         e.preventDefault();
 
+export const login = (req, res) => {
 
+    console.log("LOGIN REQUEST:", req.body);
+
+    const { email, password } = req.body;
+
+    
+}
         try{
 
             const res = await API.post("/auth/login", form);

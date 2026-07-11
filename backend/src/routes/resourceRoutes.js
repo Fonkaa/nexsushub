@@ -5,14 +5,35 @@ import {
     createResource
 } from "../controllers/resourceController.js";
 
+import verifyToken from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+const adminOnly = (req, res, next) => {
 
-router.get("/", getResources);
+    if (req.user.role !== "admin") {
 
+        return res.status(403).json({
+            message: "Admin access required"
+        });
 
-router.post("/", createResource);
+    }
 
+    next();
+
+};
+
+router.get(
+    "/",
+    verifyToken,
+    getResources
+);
+
+router.post(
+    "/",
+    verifyToken,
+    adminOnly,
+    createResource
+);
 
 export default router;

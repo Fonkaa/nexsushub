@@ -4,84 +4,62 @@ import API from "../api/axios";
 
 function WorkRequests() {
 
+    const user = JSON.parse(localStorage.getItem("user"));
+
     const [requests, setRequests] = useState([]);
 
+    const [teamMembers, setTeamMembers] = useState([]);
+
+
     const [form, setForm] = useState({
+
         title: "",
         description: "",
         priority: "Medium"
+
     });
 
 
+
     useEffect(() => {
+
         fetchRequests();
+
+
+        if(user?.role === "admin"){
+
+            fetchTeamMembers();
+
+        }
+
+
     }, []);
 
 
 
-    const fetchRequests = async () => {
 
-        try {
+const fetchRequests = async()=>{
 
-            const res = await API.get("/requests");
+    try{
 
-            setRequests(res.data);
-
-        } catch (error) {
-
-            console.log("Error fetching requests:", error);
-
-        }
-
-    };
+        const res = await API.get("/requests");
 
 
-
-    const handleChange = (e) => {
-
-        setForm({
-
-            ...form,
-
-            [e.target.name]: e.target.value
-
-        });
-
-    };
+console.log(
+    "REQUEST DATA FULL:",
+    JSON.stringify(res.data, null, 2)
+);
 
 
-
-   const createRequest = async () => {
-
-    try {
-
-        const res = await API.post("/requests", {
-
-            title: form.title,
-            description: form.description,
-            priority: form.priority
-
-        });
+        setRequests(res.data);
 
 
-        console.log(res.data);
+    }catch(error){
 
-
-        setForm({
-
-            title: "",
-            description: "",
-            priority: "Medium"
-
-        });
-
-
-        fetchRequests();
-
-
-    } catch(error) {
-
-        console.log("Create request error:", error.response?.data || error.message);
+        console.log(
+            "Fetch requests error:",
+            error
+        );
 
     }
 
@@ -89,11 +67,109 @@ function WorkRequests() {
 
 
 
-    const updateStatus = async (id, status) => {
 
-        try {
 
-            await API.put(`/requests/${id}`, {
+    const fetchTeamMembers = async()=>{
+
+        try{
+
+            const res = await API.get("/team");
+
+            setTeamMembers(res.data);
+
+
+        }catch(error){
+
+            console.log(
+                "Team members error:",
+                error
+            );
+
+        }
+
+    };
+
+
+
+
+
+
+    const handleChange=(e)=>{
+
+        setForm({
+
+            ...form,
+
+            [e.target.name]:e.target.value
+
+        });
+
+    };
+
+
+
+
+
+
+
+    const createRequest = async(e)=>{
+
+        e.preventDefault();
+
+
+        try{
+
+
+            await API.post("/requests",{
+
+                title: form.title,
+
+                description: form.description,
+
+                priority: form.priority
+
+            });
+
+
+
+            setForm({
+
+                title:"",
+                description:"",
+                priority:"Medium"
+
+            });
+
+
+
+            fetchRequests();
+
+
+
+        }catch(error){
+
+            console.log(
+                "Create request error:",
+                error.response?.data || error.message
+            );
+
+        }
+
+    };
+
+
+
+
+
+
+
+    const updateStatus = async(id,status)=>{
+
+
+        try{
+
+
+            await API.put(`/requests/${id}`,{
 
                 status
 
@@ -103,9 +179,13 @@ function WorkRequests() {
             fetchRequests();
 
 
-        } catch (error) {
 
-            console.log("Update error:", error);
+        }catch(error){
+
+            console.log(
+                "Update status error:",
+                error
+            );
 
         }
 
@@ -113,216 +193,440 @@ function WorkRequests() {
 
 
 
-    const deleteRequest = async (id) => {
 
-        try {
 
-            await API.delete(`/requests/${id}`);
+
+
+    const assignRequest = async(id,assigned_to)=>{
+
+
+        try{
+
+
+            await API.put(`/requests/assign/${id}`,{
+
+                assigned_to
+
+            });
+
+
 
             fetchRequests();
 
 
-        } catch (error) {
 
-            console.log("Delete error:", error);
+        }catch(error){
+
+            console.log(
+                "Assign error:",
+                error
+            );
 
         }
+
 
     };
 
 
 
 
-    return (
 
-        <div className="p-6">
 
 
-            <h1 className="text-3xl font-bold mb-5">
-                Work Requests
-            </h1>
 
+    const deleteRequest = async(id)=>{
 
 
-            <div className="bg-white p-5 rounded shadow mb-6">
+        try{
 
 
-                <input
+            await API.delete(`/requests/${id}`);
 
-                    name="title"
 
-                    placeholder="Request title"
+            fetchRequests();
 
-                    value={form.title}
 
-                    onChange={handleChange}
 
-                    className="border p-2 w-full mb-3"
+        }catch(error){
 
-                />
+            console.log(
+                "Delete error:",
+                error
+            );
 
+        }
 
 
-                <textarea
+    };
 
-                    name="description"
 
-                    placeholder="Description"
 
-                    value={form.description}
 
-                    onChange={handleChange}
 
-                    className="border p-2 w-full mb-3"
 
-                />
 
+return(
 
+<div className="p-6">
 
-                <select
 
-                    name="priority"
+<h1 className="text-3xl font-bold mb-5">
 
-                    value={form.priority}
+Work Requests
 
-                    onChange={handleChange}
+</h1>
 
-                    className="border p-2 mb-3"
 
-                >
 
-                    <option value="High">
-                        High
-                    </option>
 
 
-                    <option value="Medium">
-                        Medium
-                    </option>
+<div className="bg-white p-5 rounded shadow mb-6">
 
 
-                    <option value="Low">
-                        Low
-                    </option>
+<input
 
+name="title"
 
-                </select>
+placeholder="Request title"
 
+value={form.title}
 
+onChange={handleChange}
 
-                <br />
+className="border p-2 w-full mb-3"
 
+/>
 
-                <button
 
-                    onClick={createRequest}
 
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
 
-                >
 
-                    Create Request
+<textarea
 
-                </button>
+name="description"
 
+placeholder="Description"
 
-            </div>
+value={form.description}
 
+onChange={handleChange}
 
+className="border p-2 w-full mb-3"
 
+/>
 
 
-            <table border="1" width="100%">
 
 
-                <thead>
 
-                    <tr>
 
-                        <th>Title</th>
+<select
 
-                        <th>Description</th>
+name="priority"
 
-                        <th>Priority</th>
+value={form.priority}
 
-                        <th>Status</th>
+onChange={handleChange}
 
-                        <th>Actions</th>
+className="border p-2 mb-3"
 
+>
 
-                    </tr>
 
+<option value="High">
+High
+</option>
 
-                </thead>
 
+<option value="Medium">
+Medium
+</option>
 
 
-                <tbody>
+<option value="Low">
+Low
+</option>
 
 
-                    {
 
-                        requests.map((r) => (
+</select>
 
-                            <tr key={r.id}>
 
 
-                                <td>{r.title}</td>
+<br/>
 
 
-                                <td>{r.description}</td>
+<button
 
+onClick={createRequest}
 
-                                <td>{r.priority}</td>
+className="bg-blue-500 text-white px-4 py-2 rounded"
 
+>
 
-                                <td>{r.status}</td>
+Create Request
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+<table border="1" width="100%">
+
+
+<thead>
+
+<tr>
+
+<th>Title</th>
+
+<th>Description</th>
+
+<th>Priority</th>
+
+<th>Status</th>
+
+<th>Assigned To</th>
+
+<th>Actions</th>
+
+
+</tr>
+
+</thead>
+
+
+
+
+
+<tbody>
+
+
+{
+
+requests.map((r)=>(
+
+
+<tr key={r.id}>
+
+
+<td>
+{r.title}
+</td>
+
+
+
+<td>
+{r.description}
+</td>
+
+
+
+<td>
+{r.priority}
+</td>
+
+
+
+<td>
+{r.status}
+</td>
+
+
 
 
 <td>
 
-    <button
-        onClick={() => updateStatus(r.id,"Approved")}
-        className="bg-green-500 text-white px-3 py-1 rounded mr-2"
-    >
-        Approve
-    </button>
+{
 
+r.assigned_name
 
-    <button
-        onClick={() => updateStatus(r.id,"Rejected")}
-        className="bg-red-500 text-white px-3 py-1 rounded mr-2"
-    >
-        Reject
-    </button>
+?
 
+r.assigned_name
 
-    <button
-        onClick={() => deleteRequest(r.id)}
-        className="bg-gray-500 text-white px-3 py-1 rounded"
-    >
-        Delete
-    </button>
+:
+
+"Not Assigned"
+
+}
+
 
 </td>
 
 
-                            </tr>
-
-                        ))
-
-                    }
 
 
-                </tbody>
+
+<td>
+
+{
+user?.role === "admin" && (
+
+<>
+
+<select
+
+className="border p-1 mr-2"
+
+defaultValue=""
+
+onChange={(e)=>{
+
+    if(e.target.value){
+
+        assignRequest(
+            r.id,
+            e.target.value
+        );
+
+    }
+
+}}
+
+>
+
+<option value="">
+
+Assign Member
+
+</option>
 
 
-            </table>
+{
+
+teamMembers.map((member)=>(
+
+<option
+
+key={member.id}
+
+value={member.id}
+
+>
+
+{member.full_name}
+
+</option>
 
 
-        </div>
+))
 
-    );
+
+}
+
+
+</select>
+
+
+
+
+
+{
+
+r.status?.toLowerCase() === "pending" && (
+
+<>
+
+<button
+
+onClick={()=>updateStatus(
+    r.id,
+    "Approved"
+)}
+
+className="bg-green-500 text-white px-3 py-1 rounded mr-2"
+
+>
+
+Approve
+
+</button>
+
+
+
+
+
+<button
+
+onClick={()=>updateStatus(
+    r.id,
+    "Rejected"
+)}
+
+className="bg-red-500 text-white px-3 py-1 rounded mr-2"
+
+>
+
+Reject
+
+</button>
+
+
+</>
+
+)
+
+}
+
+
+
+
+
+
+<button
+
+onClick={()=>deleteRequest(r.id)}
+
+className="bg-gray-500 text-white px-3 py-1 rounded"
+
+>
+
+Delete
+
+</button>
+
+
+
+</>
+
+)
+
+}
+
+
+</td>
+
+
+
+</tr>
+
+
+))
+
+
+}
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+);
+
 
 }
 
