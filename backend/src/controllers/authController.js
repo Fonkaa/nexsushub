@@ -65,14 +65,14 @@ export const register = (req, res) => {
     ],
                 (err, result) => {
 
-                    if (err) {
-                        return res.status(500).json({
-                            message: "User registration failed",
-                            error: err
-                            
-                        });
-                        console.log(err.sql);
-                    }
+                  if (err) {
+    console.log(err.sql);
+
+    return res.status(500).json({
+        message: "User registration failed",
+        error: err
+    });
+}
 
 
                     res.status(201).json({

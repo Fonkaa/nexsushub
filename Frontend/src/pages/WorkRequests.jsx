@@ -1,67 +1,94 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
 
-
-function WorkRequests() {
-
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    const [requests, setRequests] = useState([]);
-
-    const [teamMembers, setTeamMembers] = useState([]);
-
-
-    const [form, setForm] = useState({
-
-        title: "",
-        description: "",
-        priority: "Medium"
-
-    });
+import {
+    FaClipboardList,
+    FaUserShield,
+    FaPlus,
+    FaCheck,
+    FaTimes,
+    FaTrash,
+    FaUserPlus,
+    FaFilter
+} from "react-icons/fa";
 
 
-
-    useEffect(() => {
-
-        fetchRequests();
+function WorkRequests(){
 
 
-        if(user?.role === "admin"){
-
-            fetchTeamMembers();
-
-        }
-
-
-    }, []);
-
-
-
-
-const fetchRequests = async()=>{
-
-    try{
-
-        const res = await API.get("/requests");
-
-
-console.log(
-    "REQUEST DATA FULL:",
-    JSON.stringify(res.data, null, 2)
+const user = JSON.parse(
+    localStorage.getItem("user")
 );
 
 
-        setRequests(res.data);
+
+const [requests,setRequests]=useState([]);
+
+const [teamMembers,setTeamMembers]=useState([]);
 
 
-    }catch(error){
+const [statusFilter,setStatusFilter]=useState("All");
 
-        console.log(
-            "Fetch requests error:",
-            error
-        );
+const [priorityFilter,setPriorityFilter]=useState("All");
 
-    }
+
+
+const [form,setForm]=useState({
+
+title:"",
+description:"",
+priority:"Medium"
+
+});
+
+
+
+
+
+
+useEffect(()=>{
+
+
+fetchRequests();
+
+
+if(user?.role==="admin"){
+
+fetchTeamMembers();
+
+}
+
+
+},[]);
+
+
+
+
+
+
+
+
+const fetchRequests=async()=>{
+
+
+try{
+
+
+const res=await API.get("/requests");
+
+setRequests(res.data);
+
+
+
+}catch(error){
+
+console.log(
+"Fetch requests error:",
+error
+);
+
+}
+
 
 };
 
@@ -69,163 +96,143 @@ console.log(
 
 
 
-    const fetchTeamMembers = async()=>{
 
-        try{
 
-            const res = await API.get("/team");
 
-            setTeamMembers(res.data);
+const fetchTeamMembers=async()=>{
 
 
-        }catch(error){
+try{
 
-            console.log(
-                "Team members error:",
-                error
-            );
 
-        }
+const res=await API.get("/team");
 
-    };
 
+setTeamMembers(res.data);
 
 
 
+}catch(error){
 
+console.log(error);
 
-    const handleChange=(e)=>{
+}
 
-        setForm({
 
-            ...form,
+};
 
-            [e.target.name]:e.target.value
 
-        });
 
-    };
 
 
 
 
 
+const handleChange=(e)=>{
 
 
-    const createRequest = async(e)=>{
+setForm({
 
-        e.preventDefault();
+...form,
 
+[e.target.name]:e.target.value
 
-        try{
+});
 
 
-            await API.post("/requests",{
+};
 
-                title: form.title,
 
-                description: form.description,
 
-                priority: form.priority
 
-            });
 
 
 
-            setForm({
 
-                title:"",
-                description:"",
-                priority:"Medium"
 
-            });
+const createRequest=async(e)=>{
 
 
+e.preventDefault();
 
-            fetchRequests();
 
+try{
 
 
-        }catch(error){
+await API.post(
 
-            console.log(
-                "Create request error:",
-                error.response?.data || error.message
-            );
+"/requests",
 
-        }
+form
 
-    };
+);
 
 
 
+setForm({
 
+title:"",
+description:"",
+priority:"Medium"
 
+});
 
 
-    const updateStatus = async(id,status)=>{
 
+fetchRequests();
 
-        try{
 
 
-            await API.put(`/requests/${id}`,{
+}catch(error){
 
-                status
+console.log(error);
 
-            });
+}
 
 
-            fetchRequests();
+};
 
 
 
-        }catch(error){
 
-            console.log(
-                "Update status error:",
-                error
-            );
 
-        }
 
-    };
 
 
 
+const updateStatus=async(id,status)=>{
 
 
+try{
 
 
-    const assignRequest = async(id,assigned_to)=>{
+await API.put(
 
+`/requests/${id}`,
 
-        try{
+{
+status
+}
 
+);
 
-            await API.put(`/requests/assign/${id}`,{
 
-                assigned_to
 
-            });
+fetchRequests();
 
 
 
-            fetchRequests();
+}catch(error){
 
+console.log(error);
 
+}
 
-        }catch(error){
 
-            console.log(
-                "Assign error:",
-                error
-            );
+};
 
-        }
 
 
-    };
 
 
 
@@ -233,31 +240,107 @@ console.log(
 
 
 
+const assignRequest=async(id,assigned_to)=>{
 
-    const deleteRequest = async(id)=>{
 
+try{
 
-        try{
 
+await API.put(
 
-            await API.delete(`/requests/${id}`);
+`/requests/assign/${id}`,
 
+{
+assigned_to
+}
 
-            fetchRequests();
+);
 
 
 
-        }catch(error){
+fetchRequests();
 
-            console.log(
-                "Delete error:",
-                error
-            );
 
-        }
 
+}catch(error){
 
-    };
+console.log(error);
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+
+const deleteRequest=async(id)=>{
+
+
+if(!window.confirm(
+"Delete this request?"
+))
+return;
+
+
+
+try{
+
+
+await API.delete(
+
+`/requests/${id}`
+
+);
+
+
+
+fetchRequests();
+
+
+
+}catch(error){
+
+console.log(error);
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+
+const filteredRequests=requests.filter((r)=>{
+
+
+const statusMatch =
+statusFilter==="All" ||
+r.status===statusFilter;
+
+
+
+const priorityMatch =
+priorityFilter==="All" ||
+r.priority===priorityFilter;
+
+
+
+return statusMatch && priorityMatch;
+
+
+
+});
 
 
 
@@ -267,54 +350,195 @@ console.log(
 
 return(
 
-<div className="p-6">
+
+<div className="
+min-h-screen
+bg-gray-100
+p-6
+">
 
 
-<h1 className="text-3xl font-bold mb-5">
+
+{/* HEADER */}
+
+
+<div className="
+flex
+justify-between
+items-center
+mb-8
+">
+
+
+<div className="
+flex
+items-center
+gap-4
+">
+
+
+<div className="
+w-16
+h-16
+rounded-2xl
+bg-blue-100
+flex
+items-center
+justify-center
+text-blue-600
+text-3xl
+">
+
+
+<FaClipboardList/>
+
+
+</div>
+
+
+
+<div>
+
+<h1 className="
+text-4xl
+font-bold
+text-gray-800
+">
 
 Work Requests
 
 </h1>
 
 
+<p className="
+text-gray-500
+mt-1
+">
+
+Manage employee requests efficiently
+
+</p>
+
+
+</div>
+
+
+</div>
 
 
 
-<div className="bg-white p-5 rounded shadow mb-6">
+
+
+<div className="
+bg-white
+shadow-sm
+rounded-2xl
+px-6
+py-4
+flex
+items-center
+gap-3
+">
+
+
+<FaUserShield
+className="text-blue-600"
+/>
+
+
+<div>
+
+<p className="
+text-xs
+text-gray-500
+">
+
+Role
+
+</p>
+
+
+<p className="
+font-bold
+capitalize
+">
+
+{user?.role}
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+{/* CREATE REQUEST */}
+
+{
+
+user?.role !== "admin" &&
+
+<div className="
+bg-white
+rounded-3xl
+shadow-lg
+p-8
+mb-8
+">
+
+
+<h2 className="
+text-2xl
+font-bold
+text-gray-800
+mb-6
+flex
+items-center
+gap-3
+">
+
+<FaPlus
+className="text-blue-600"
+/>
+
+Create New Request
+
+</h2>
+
+
+
+
+<div className="
+grid
+md:grid-cols-2
+gap-5
+">
 
 
 <input
 
 name="title"
 
-placeholder="Request title"
-
 value={form.title}
 
 onChange={handleChange}
 
-className="border p-2 w-full mb-3"
+placeholder="Request title"
+
+className="
+border
+rounded-2xl
+p-4
+outline-none
+focus:ring-2
+focus:ring-blue-500
+"
 
 />
-
-
-
-
-
-<textarea
-
-name="description"
-
-placeholder="Description"
-
-value={form.description}
-
-onChange={handleChange}
-
-className="border p-2 w-full mb-3"
-
-/>
-
 
 
 
@@ -328,9 +552,225 @@ value={form.priority}
 
 onChange={handleChange}
 
-className="border p-2 mb-3"
+className="
+border
+rounded-2xl
+p-4
+outline-none
+focus:ring-2
+focus:ring-blue-500
+"
 
 >
+
+
+<option value="High">
+High Priority
+</option>
+
+
+<option value="Medium">
+Medium Priority
+</option>
+
+
+<option value="Low">
+Low Priority
+</option>
+
+
+</select>
+
+
+
+</div>
+
+
+
+
+
+
+
+<textarea
+
+name="description"
+
+value={form.description}
+
+onChange={handleChange}
+
+placeholder="Explain your request..."
+
+className="
+w-full
+mt-5
+border
+rounded-2xl
+p-4
+h-32
+outline-none
+focus:ring-2
+focus:ring-blue-500
+"
+
+/>
+
+
+
+
+
+
+<button
+
+onClick={createRequest}
+
+className="
+mt-5
+flex
+items-center
+gap-3
+bg-gradient-to-r
+from-blue-600
+to-purple-600
+text-white
+px-7
+py-3
+rounded-2xl
+font-semibold
+shadow-lg
+hover:scale-105
+transition
+"
+
+>
+
+<FaPlus/>
+
+Submit Request
+
+</button>
+
+
+
+</div>
+
+}
+
+
+
+
+
+
+
+
+{/* FILTERS */}
+
+
+<div className="
+bg-white
+rounded-3xl
+shadow
+p-6
+mb-8
+">
+
+
+<div className="
+flex
+items-center
+gap-3
+mb-5
+">
+
+
+<FaFilter
+className="text-blue-600"
+/>
+
+
+<h2 className="
+text-xl
+font-bold
+">
+
+Filter Requests
+
+</h2>
+
+
+</div>
+
+
+
+
+
+<div className="
+grid
+md:grid-cols-2
+gap-5
+">
+
+
+<select
+
+className="
+border
+rounded-2xl
+p-4
+"
+
+onChange={(e)=>
+setStatusFilter(e.target.value)
+}
+
+>
+
+
+<option value="All">
+All Status
+</option>
+
+
+<option value="Pending">
+Pending
+</option>
+
+
+<option value="Approved">
+Approved
+</option>
+
+
+<option value="Rejected">
+Rejected
+</option>
+
+
+</select>
+
+
+
+
+
+
+<select
+
+className="
+border
+rounded-2xl
+p-4
+"
+
+onChange={(e)=>
+setPriorityFilter(e.target.value)
+}
+
+>
+
+
+<option value="All">
+All Priority
+</option>
 
 
 <option value="High">
@@ -348,25 +788,10 @@ Low
 </option>
 
 
-
 </select>
 
 
-
-<br/>
-
-
-<button
-
-onClick={createRequest}
-
-className="bg-blue-500 text-white px-4 py-2 rounded"
-
->
-
-Create Request
-
-</button>
+</div>
 
 
 
@@ -378,29 +803,94 @@ Create Request
 
 
 
-<table border="1" width="100%">
 
 
-<thead>
+{/* REQUEST TABLE */}
+
+
+
+<div className="
+bg-white
+rounded-3xl
+shadow-xl
+overflow-hidden
+">
+
+
+
+<div className="
+overflow-x-auto
+">
+
+
+<table className="
+w-full
+">
+
+
+<thead className="
+bg-gray-50
+">
+
 
 <tr>
 
-<th>Title</th>
 
-<th>Description</th>
+<th className="
+p-5
+text-left
+">
 
-<th>Priority</th>
+Request
 
-<th>Status</th>
+</th>
 
-<th>Assigned To</th>
 
-<th>Actions</th>
+<th className="
+p-5
+">
+
+Priority
+
+</th>
+
+
+
+<th className="
+p-5
+">
+
+Status
+
+</th>
+
+
+
+<th className="
+p-5
+">
+
+Assigned
+
+</th>
+
+
+
+<th className="
+p-5
+">
+
+Actions
+
+</th>
 
 
 </tr>
 
+
 </thead>
+
+
 
 
 
@@ -411,87 +901,291 @@ Create Request
 
 {
 
-requests.map((r)=>(
+filteredRequests.length===0 ?
 
 
-<tr key={r.id}>
+<tr>
+
+<td
+
+colSpan="5"
+
+className="
+text-center
+p-12
+text-gray-500
+"
+
+>
+
+No requests available
+
+</td>
+
+</tr>
 
 
-<td>
+
+:
+
+
+
+filteredRequests.map((r)=>(
+
+
+<tr
+
+key={r.id}
+
+className="
+border-t
+hover:bg-gray-50
+transition
+"
+
+>
+
+
+<td className="
+p-5
+">
+
+
+<h3 className="
+font-bold
+text-gray-800
+">
+
 {r.title}
-</td>
+
+</h3>
 
 
+<p className="
+text-sm
+text-gray-500
+mt-1
+">
 
-<td>
 {r.description}
+
+</p>
+
+
 </td>
 
 
 
-<td>
+
+
+
+
+
+<td className="
+text-center
+">
+
+
+<span
+
+className={
+
+`
+px-4
+py-2
+rounded-full
+text-sm
+font-semibold
+
+${
+r.priority==="High"
+
+?
+
+"bg-red-100 text-red-700"
+
+:
+
+r.priority==="Low"
+
+?
+
+"bg-green-100 text-green-700"
+
+:
+
+"bg-yellow-100 text-yellow-700"
+
+}
+
+`
+
+}
+
+>
+
+
 {r.priority}
+
+
+</span>
+
+
 </td>
 
 
 
-<td>
-{r.status}
+
+
+
+
+
+
+<td className="
+text-center
+">
+
+
+<span
+
+className={
+
+`
+
+px-4
+py-2
+rounded-full
+font-semibold
+text-sm
+
+${
+r.status==="Approved"
+
+?
+
+"bg-green-100 text-green-700"
+
+:
+
+r.status==="Rejected"
+
+?
+
+"bg-red-100 text-red-700"
+
+:
+
+"bg-blue-100 text-blue-700"
+
+}
+
+`
+
+}
+
+>
+
+
+{r.status || "Pending"}
+
+
+</span>
+
+
 </td>
 
 
 
 
-<td>
+
+
+
+
+
+<td className="
+text-center
+font-medium
+text-gray-600
+">
+
 
 {
 
 r.assigned_name
 
-?
+||
 
-r.assigned_name
+<span className="
+text-gray-400
+">
 
-:
+Not Assigned
 
-"Not Assigned"
+</span>
 
 }
 
 
+
 </td>
 
 
 
 
 
-<td>
+
+
+
+
+<td className="
+p-5
+">
+
 
 {
-user?.role === "admin" && (
 
-<>
+user?.role==="admin" &&
+
+
+<div className="
+flex
+flex-wrap
+gap-3
+items-center
+">
+
+
+
+
 
 <select
 
-className="border p-1 mr-2"
-
-defaultValue=""
+className="
+border
+rounded-xl
+px-3
+py-2
+text-sm
+"
 
 onChange={(e)=>{
 
-    if(e.target.value){
 
-        assignRequest(
-            r.id,
-            e.target.value
-        );
+if(e.target.value){
 
-    }
+assignRequest(
+r.id,
+e.target.value
+)
+
+}
+
 
 }}
 
+
 >
+
 
 <option value="">
 
@@ -500,9 +1194,11 @@ Assign Member
 </option>
 
 
+
 {
 
-teamMembers.map((member)=>(
+teamMembers.map(member=>(
+
 
 <option
 
@@ -512,7 +1208,9 @@ value={member.id}
 
 >
 
+
 {member.full_name}
+
 
 </option>
 
@@ -529,22 +1227,43 @@ value={member.id}
 
 
 
+
+
+
+
 {
 
-r.status?.toLowerCase() === "pending" && (
+r.status==="Pending" &&
+
 
 <>
+
 
 <button
 
 onClick={()=>updateStatus(
-    r.id,
-    "Approved"
+r.id,
+"Approved"
 )}
 
-className="bg-green-500 text-white px-3 py-1 rounded mr-2"
+className="
+flex
+items-center
+gap-2
+bg-green-600
+hover:bg-green-700
+text-white
+px-4
+py-2
+rounded-xl
+font-semibold
+transition
+"
+
 
 >
+
+<FaCheck/>
 
 Approve
 
@@ -554,16 +1273,32 @@ Approve
 
 
 
+
 <button
 
 onClick={()=>updateStatus(
-    r.id,
-    "Rejected"
+r.id,
+"Rejected"
 )}
 
-className="bg-red-500 text-white px-3 py-1 rounded mr-2"
+className="
+flex
+items-center
+gap-2
+bg-red-600
+hover:bg-red-700
+text-white
+px-4
+py-2
+rounded-xl
+font-semibold
+transition
+"
+
 
 >
+
+<FaTimes/>
 
 Reject
 
@@ -572,9 +1307,10 @@ Reject
 
 </>
 
-)
 
 }
+
+
 
 
 
@@ -585,24 +1321,44 @@ Reject
 
 onClick={()=>deleteRequest(r.id)}
 
-className="bg-gray-500 text-white px-3 py-1 rounded"
+className="
+flex
+items-center
+gap-2
+bg-gray-800
+hover:bg-black
+text-white
+px-4
+py-2
+rounded-xl
+font-semibold
+transition
+"
+
 
 >
 
+
+<FaTrash/>
+
 Delete
+
 
 </button>
 
 
 
-</>
 
-)
+
+</div>
+
 
 }
 
 
 </td>
+
+
 
 
 
@@ -615,10 +1371,22 @@ Delete
 }
 
 
+
 </tbody>
 
 
 </table>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
 
 
 

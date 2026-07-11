@@ -1,18 +1,114 @@
 import express from "express";
 
+
 import {
-    getTeamMembers,
-    createTeamMember
+
+getTeamMembers,
+createTeamMember,
+updateTeamMember,
+deleteTeamMember
+
 } from "../controllers/teamController.js";
 
 
-const router = express.Router();
+import verifyToken from "../middleware/authMiddleware.js";
 
 
-router.get("/", getTeamMembers);
+const router=express.Router();
 
 
-router.post("/", createTeamMember);
+
+
+const adminOnly=(req,res,next)=>{
+
+
+if(req.user.role!=="admin"){
+
+
+return res.status(403).json({
+
+message:"Admin access required"
+
+});
+
+
+}
+
+
+next();
+
+
+};
+
+
+
+
+
+router.get(
+
+"/",
+
+verifyToken,
+
+getTeamMembers
+
+);
+
+
+
+
+
+
+router.post(
+
+"/",
+
+verifyToken,
+
+adminOnly,
+
+createTeamMember
+
+);
+
+
+
+
+
+
+
+router.put(
+
+"/:id",
+
+verifyToken,
+
+adminOnly,
+
+updateTeamMember
+
+);
+
+
+
+
+
+
+
+router.delete(
+
+"/:id",
+
+verifyToken,
+
+adminOnly,
+
+deleteTeamMember
+
+);
+
+
+
 
 
 export default router;

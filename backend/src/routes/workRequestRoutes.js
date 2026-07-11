@@ -4,8 +4,8 @@ import {
     getWorkRequests,
     createWorkRequest,
     updateWorkRequest,
-    deleteWorkRequest,
-    assignRequest
+    assignRequest,
+    deleteWorkRequest
 } from "../controllers/workRequestController.js";
 
 
@@ -15,20 +15,46 @@ import verifyToken from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 
-router.get("/", verifyToken, getWorkRequests);
+// Get requests
+router.get(
+    "/",
+    verifyToken,
+    getWorkRequests
+);
 
 
-router.post("/", verifyToken, createWorkRequest);
+// Employee can create request
+router.post(
+    "/",
+    verifyToken,
+    createWorkRequest
+);
 
 
-router.put("/:id", verifyToken, updateWorkRequest);
+// Admin only actions
+router.put(
+    "/:id",
+    verifyToken,
+    updateWorkRequest
+);
 
 
-// Assign request
-router.put("/assign/:id", verifyToken, assignRequest);
+router.put(
+    "/assign/:id",
+    verifyToken,
+    assignRequest
+);
 
-
-router.delete("/:id", verifyToken, deleteWorkRequest);
+router.put(
+    "/:id",
+    verifyToken,
+    updateWorkRequest
+);
+router.delete(
+    "/:id",
+    verifyToken,
+    deleteWorkRequest
+);
 
 
 export default router;

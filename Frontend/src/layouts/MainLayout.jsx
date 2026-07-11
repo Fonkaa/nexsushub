@@ -5,33 +5,56 @@ import Navbar from "../components/Navbar";
 function MainLayout({children}) {
 
 
-  return (
+    return (
 
-    <div className="flex h-screen">
-
-
-      <Sidebar />
+        <div className="flex h-screen bg-gray-100">
 
 
-      <div className="flex-1">
+            {/* Sidebar */}
+
+            <aside className="w-64 hidden md:block">
+
+                <Sidebar />
+
+            </aside>
 
 
-        <Navbar />
 
 
-        <main className="p-6 bg-gray-100 min-h-screen">
 
-          {children}
+            {/* Main Area */}
 
-        </main>
-
-
-      </div>
+            <div className="flex-1 flex flex-col overflow-hidden">
 
 
-    </div>
 
-  );
+                {/* Navbar */}
+
+                <Navbar />
+
+
+
+
+
+                {/* Page Content */}
+
+                <main className="flex-1 overflow-y-auto p-6">
+
+
+                    {children}
+
+
+                </main>
+
+
+
+            </div>
+
+
+        </div>
+
+    );
+
 
 }
 

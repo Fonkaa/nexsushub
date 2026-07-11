@@ -1,16 +1,19 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
-import Login from "../pages/Login";
+
 import Dashboard from "../pages/Dashboard";
 import TeamMembers from "../pages/TeamMembers";
 import WorkRequests from "../pages/WorkRequests";
 import Resources from "../pages/Resources";
 import Statistics from "../pages/Statistics";
+import SearchResults from "../pages/SearchResults";
 
 import { Register } from "../pages/Register.jsx";
 import MainLayout from "../layouts/MainLayout";
 
+import Login from "../pages/Login";
+import Profile from "../pages/Profile";
 
 
 function AppRoutes(){
@@ -20,82 +23,239 @@ return (
 
 <BrowserRouter>
 
-
 <Routes>
 
 
+
+{/* PUBLIC ROUTES */}
+
+
 <Route
+
 path="/"
+
 element={<Login />}
+
 />
+
+
+
 <Route
-    path="/register"
-    element={<Register />}
+
+path="/register"
+
+element={<Register />}
+
 />
+
+
+
+
+
+{/* DASHBOARD */}
+
+
 <Route
+
 path="/dashboard"
+
 element={
+
 <ProtectedRoute>
+
 <MainLayout>
+
 <Dashboard/>
+
 </MainLayout>
+
 </ProtectedRoute>
+
 }
+
 />
 
 
+
+
+
+
+{/* SEARCH */}
+
+
 <Route
+
+path="/search"
+
+element={
+
+<ProtectedRoute>
+
+<MainLayout>
+
+<SearchResults/>
+
+</MainLayout>
+
+</ProtectedRoute>
+
+}
+
+/>
+
+
+
+
+
+
+{/* PROFILE */}
+
+
+<Route
+
+path="/profile"
+
+element={
+
+<ProtectedRoute>
+
+<MainLayout>
+
+<Profile/>
+
+</MainLayout>
+
+</ProtectedRoute>
+
+}
+
+/>
+
+
+
+
+
+
+
+{/* TEAM MEMBERS ADMIN ONLY */}
+
+
+<Route
+
 path="/team-members"
+
 element={
-    <ProtectedRoute>
+
+<ProtectedRoute role="admin">
+
 <MainLayout>
+
 <TeamMembers/>
+
 </MainLayout>
+
 </ProtectedRoute>
+
 }
+
 />
 
 
+
+
+
+
+
+{/* WORK REQUESTS */}
+
+
 <Route
+
 path="/requests"
+
 element={
-    <ProtectedRoute>
+
+<ProtectedRoute>
+
 <MainLayout>
+
 <WorkRequests/>
+
 </MainLayout>
+
 </ProtectedRoute>
+
 }
+
 />
 
 
+
+
+
+
+
+{/* RESOURCES */}
+
+
 <Route
+
 path="/resources"
+
 element={
-    <ProtectedRoute>
+
+<ProtectedRoute>
+
 <MainLayout>
+
 <Resources/>
+
 </MainLayout>
+
 </ProtectedRoute>
+
 }
+
 />
+
+
+
+
+
+
+
+{/* STATISTICS */}
 
 
 <Route
+
 path="/statistics"
+
 element={
-    <ProtectedRoute>
+
+<ProtectedRoute>
+
 <MainLayout>
+
 <Statistics/>
+
 </MainLayout>
+
 </ProtectedRoute>
+
 }
+
 />
+
+
+
 
 
 </Routes>
 
 
 </BrowserRouter>
+
 
 );
 
