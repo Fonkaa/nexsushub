@@ -218,96 +218,115 @@ setLoading(false);
 
 // UPLOAD IMAGE ONLY
 
-const uploadImage=async()=>{
-
-
-if(!image){
-
-alert(
-"Please select an image first"
-);
-
-return;
-
-}
 
 
 
-try{
+const uploadImage = async()=>{
 
 
-const formData=new FormData();
+    if(!image){
+
+        alert("Please select an image first");
+        return;
+
+    }
 
 
-
-formData.append(
-
-"profile_image",
-
-image
-
-);
+    try{
 
 
+        const formData = new FormData();
 
 
-await API.put(
-
-"/profile/image",
-
-formData,
-
-{
-
-headers:{
-
-"Content-Type":"multipart/form-data"
-
-}
-
-}
-
-);
+        formData.append(
+            "profile_image",
+            image
+        );
 
 
 
-alert(
-"Profile picture updated successfully"
-);
+        const res = await API.put(
+
+            "/profile/image",
+
+            formData,
+
+            {
+                headers:{
+                    "Content-Type":"multipart/form-data"
+                }
+            }
+
+        );
 
 
 
-setImage(null);
+        console.log(
+            "UPLOAD RESPONSE:",
+            res.data
+        );
 
 
-fetchProfile();
+
+        // update local storage user image
+        const oldUser = JSON.parse(
+            localStorage.getItem("user")
+        );
+
+
+        const updatedUser = {
+
+            ...oldUser,
+
+            profile_image: res.data.image
+
+        };
+
+
+        localStorage.setItem(
+
+            "user",
+
+            JSON.stringify(updatedUser)
+
+        );
 
 
 
-}catch(error){
+        alert(
+            "Profile picture updated successfully"
+        );
 
 
-console.log(error);
+
+        setImage(null);
 
 
-alert(
-"Image upload failed"
-);
+        fetchProfile();
 
 
-}
 
+    }catch(error){
+
+
+        console.log(
+
+            "IMAGE UPLOAD ERROR:",
+
+            error.response?.data || error
+
+        );
+
+
+        alert(
+            "Image upload failed"
+        );
+
+
+    }
 
 
 };
-
-
-
-
-
-
-
-
 
 const changePassword=async(e)=>{
 

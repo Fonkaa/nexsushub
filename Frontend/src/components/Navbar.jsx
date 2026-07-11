@@ -9,12 +9,10 @@ import { useEffect, useState } from "react";
 import API from "../api/axios";
 
 
-
 function Navbar(){
 
 
 const navigate = useNavigate();
-
 
 
 const user = JSON.parse(
@@ -23,6 +21,7 @@ const user = JSON.parse(
 
 
 
+const [profile,setProfile]=useState(null);
 
 
 const [notifications,setNotifications]=useState([]);
@@ -38,11 +37,39 @@ const [search,setSearch]=useState("");
 useEffect(()=>{
 
 
+fetchProfile();
+
 fetchNotifications();
 
 
 },[]);
 
+
+
+
+
+// GET UPDATED PROFILE
+
+const fetchProfile=async()=>{
+
+try{
+
+const res = await API.get("/profile");
+
+
+setProfile(res.data);
+
+
+}catch(error){
+
+console.log(
+"PROFILE ERROR:",
+error
+);
+
+}
+
+};
 
 
 
@@ -506,12 +533,16 @@ rounded-xl
 >
 
 
+
+
+
 <div
 
 className="
 w-12
 h-12
 rounded-full
+overflow-hidden
 bg-gradient-to-r
 from-blue-600
 to-purple-600
@@ -528,15 +559,35 @@ text-xl
 
 {
 
-user?.name
+profile?.profile_image ?
+
+
+<img
+
+src={`http://localhost:5000/uploads/${profile.profile_image}`}
+
+className="
+w-full
+h-full
+object-cover
+"
+
+/>
+
+
+:
+
+
+profile?.name
 
 ?
 
-user.name.charAt(0).toUpperCase()
+profile.name.charAt(0).toUpperCase()
 
 :
 
 "U"
+
 
 }
 
@@ -554,7 +605,7 @@ font-semibold
 text-gray-800
 ">
 
-{user?.name}
+{profile?.name || user?.name}
 
 </p>
 
