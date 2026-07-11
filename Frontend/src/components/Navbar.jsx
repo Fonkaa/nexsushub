@@ -163,16 +163,13 @@ const handleSearch=(e)=>{
 
 
 
-const logout=()=>{
+const logout = ()=>{
 
+    localStorage.removeItem("token");
 
-localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-localStorage.removeItem("user");
-
-
-navigate("/");
-
+    navigate("/login");
 
 };
 

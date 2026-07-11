@@ -1,14 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
-
 import Dashboard from "../pages/Dashboard";
 import TeamMembers from "../pages/TeamMembers";
 import WorkRequests from "../pages/WorkRequests";
 import Resources from "../pages/Resources";
 import Statistics from "../pages/Statistics";
 import SearchResults from "../pages/SearchResults";
-
+import HomePage from "../pages/HomePage";
 import { Register } from "../pages/Register.jsx";
 import MainLayout from "../layouts/MainLayout";
 
@@ -29,28 +28,20 @@ return (
 
 {/* PUBLIC ROUTES */}
 
-
 <Route
-
 path="/"
-
-element={<Login />}
-
+element={<HomePage/>}
 />
-
-
 
 <Route
-
-path="/register"
-
-element={<Register />}
-
+path="/login"
+element={<Login/>}
 />
 
-
-
-
+<Route
+path="/register"
+element={<Register/>}
+/>
 
 {/* DASHBOARD */}
 

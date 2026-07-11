@@ -569,7 +569,7 @@ Already have an account?
 
 <Link
 
-to="/"
+to="/login"
 
 className="
 ml-2
