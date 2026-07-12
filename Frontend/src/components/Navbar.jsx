@@ -250,14 +250,19 @@ xl:text-2xl
 
     {/* RIGHT */}
 
-   <div
+<div
 className="
 flex
+flex-wrap
 items-center
+justify-end
 gap-3
 xl:gap-6
+
+w-full
+sm:w-auto
+
 ml-auto
-pl-4
 "
 >
 
@@ -265,52 +270,48 @@ pl-4
 
         {/* SEARCH */}
 
-        <form
+       <form
+    onSubmit={handleSearch}
+    className="
+    flex
+    items-center
+    bg-gray-100
+    rounded-xl
+    px-3
+    py-2
 
-        onSubmit={handleSearch}
+    w-full
+    sm:w-72
+    md:w-56
+    lg:w-64
+    xl:w-80
 
+    order-3
+    sm:order-none
+    "
+>
+
+    <FaSearch
         className="
-        hidden
-        md:flex
-        items-center
-        bg-gray-100
-        rounded-xl
-        px-4
-        py-2
-        w-56
-        lg:w-64
-        xl:w-80
+        text-gray-400
+        mr-2
         "
+    />
 
-        >
+    <input
+        type="text"
+        placeholder="Search..."
+        value={search}
+        onChange={(e)=>setSearch(e.target.value)}
+        className="
+        bg-transparent
+        outline-none
+        w-full
+        text-sm
+        "
+    />
 
-            <FaSearch
-            className="
-            text-gray-400
-            mr-3
-            "
-            />
-
-            <input
-
-            type="text"
-
-            placeholder="Search..."
-
-            value={search}
-
-            onChange={(e)=>setSearch(e.target.value)}
-
-            className="
-            bg-transparent
-            outline-none
-            w-full
-            text-sm
-            "
-
-            />
-
-        </form>
+</form>
 
 
 {/* NOTIFICATION */}
