@@ -1,62 +1,43 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
-
-function MainLayout({children}) {
-
+function MainLayout({ children }) {
 
     return (
 
-        <div className="flex h-screen bg-gray-100">
-
+        <div className="flex min-h-screen bg-gray-100">
 
             {/* Sidebar */}
+            <Sidebar />
 
-            <aside className="w-64 hidden md:block">
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col overflow-hidden lg:ml-72">
 
-                <Sidebar />
-
-            </aside>
-
-
-
-
-
-            {/* Main Area */}
-
-            <div className="flex-1 flex flex-col overflow-hidden">
-
-
-
-                {/* Navbar */}
-
+                {/* Desktop Navbar */}
                 <Navbar />
 
-
-
-
-
                 {/* Page Content */}
-
-                <main className="flex-1 overflow-y-auto p-6">
-
+                <main
+                    className="
+                    flex-1
+                    overflow-y-auto
+                    p-4
+                    md:p-6
+                    mt-16
+                    lg:mt-0
+                    "
+                >
 
                     {children}
 
-
                 </main>
 
-
-
             </div>
-
 
         </div>
 
     );
 
-
 }
-
 
 export default MainLayout;

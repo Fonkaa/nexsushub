@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { 
+import {
     FaSignOutAlt,
     FaBell,
     FaSearch
@@ -179,120 +179,138 @@ const logout = ()=>{
 
 
 
+return (
 
-return(
+<header
+className="
+h-auto
+min-h-20
 
+mt-2
+mx-2
 
-<header className="
-h-20
+sm:mt-3
+sm:mx-3
+
 bg-white
 shadow-md
+rounded-2xl
+
 flex
+flex-col
+sm:flex-row
+
 items-center
 justify-between
-px-6
-">
+
+gap-3
+sm:gap-4
+
+px-3
+sm:px-4
+lg:px-6
+xl:px-8
+
+py-3
+"
+>
+
+    {/* LEFT */}
+
+    <div>
+
+        <h2
+        className="
+       text-lg
+lg:text-xl
+xl:text-2xl
+        font-bold
+        text-gray-800
+        "
+        >
+
+            Smart Operations Management Portal
+
+        </h2>
+
+        <p
+        className="
+        text-sm
+        text-gray-500
+        "
+        >
+
+            Welcome back, {profile?.name || user?.name}
+
+        </p>
+
+    </div>
 
 
 
+    {/* RIGHT */}
 
-
-
-<div>
-
-
-<h2 className="
-text-xl
-font-bold
-text-gray-800
-">
-
-Smart Operations Management Portal
-
-</h2>
-
-
-
-<p className="
-text-sm
-text-gray-500
-">
-
-Welcome back, {user?.name}
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div className="
+   <div
+className="
 flex
 items-center
-gap-6
-">
-{/* GLOBAL SEARCH */}
-
-<form
-
-onSubmit={handleSearch}
-
-className="
-hidden
-lg:flex
-items-center
-bg-gray-100
-rounded-xl
-px-4
-py-2
-w-72
+gap-3
+xl:gap-6
+ml-auto
+pl-4
 "
-
 >
 
 
-<FaSearch
 
-className="
-text-gray-400
-mr-3
-"
+        {/* SEARCH */}
 
-/>
+        <form
 
+        onSubmit={handleSearch}
 
-<input
+        className="
+        hidden
+        md:flex
+        items-center
+        bg-gray-100
+        rounded-xl
+        px-4
+        py-2
+        w-56
+        lg:w-64
+        xl:w-80
+        "
 
-type="text"
+        >
 
-placeholder="Search anything..."
+            <FaSearch
+            className="
+            text-gray-400
+            mr-3
+            "
+            />
 
-value={search}
+            <input
 
-onChange={(e)=>setSearch(e.target.value)}
+            type="text"
 
-className="
-bg-transparent
-outline-none
-w-full
-text-sm
-"
+            placeholder="Search..."
 
-/>
+            value={search}
 
+            onChange={(e)=>setSearch(e.target.value)}
 
-</form>
+            className="
+            bg-transparent
+            outline-none
+            w-full
+            text-sm
+            "
 
+            />
 
-
-
-
+        </form>
 
 
 {/* NOTIFICATION */}
@@ -511,7 +529,6 @@ notification.created_at
 
 {/* PROFILE */}
 
-
 <div
 
 onClick={()=>navigate("/profile")}
@@ -522,120 +539,109 @@ items-center
 gap-3
 cursor-pointer
 hover:bg-gray-100
-px-3
+px-2
+xl:px-3
 py-2
 rounded-xl
+transition
 "
 
 >
 
+    {/* Avatar */}
+
+    <div
+
+    className="
+    w-12
+    h-12
+    rounded-full
+    overflow-hidden
+    bg-gradient-to-r
+    from-blue-600
+    to-purple-600
+    text-white
+    flex
+    items-center
+    justify-center
+    font-bold
+    text-xl
+    "
+
+    >
+
+        {
+
+        profile?.profile_image
+
+        ?
+
+        <img
+
+        src={`http://localhost:5000/uploads/${profile.profile_image}`}
+
+        className="
+        w-full
+        h-full
+        object-cover
+        "
+
+        alt="Profile"
+
+        />
+
+        :
+
+        profile?.name
+
+        ?
+
+        profile.name.charAt(0).toUpperCase()
+
+        :
+
+        "U"
+
+        }
+
+    </div>
 
 
 
+    {/* Name & Role */}
 
-<div
+    <div className="hidden xl:block">
 
-className="
-w-12
-h-12
-rounded-full
-overflow-hidden
-bg-gradient-to-r
-from-blue-600
-to-purple-600
-text-white
-flex
-items-center
-justify-center
-font-bold
-text-xl
-"
+        <p className="font-semibold text-gray-800">
 
->
+            {profile?.name || user?.name}
 
+        </p>
 
-{
+        <span
 
-profile?.profile_image ?
+        className="
+        text-xs
+        px-3
+        py-1
+        rounded-full
+        bg-blue-100
+        text-blue-700
+        "
 
+        >
 
-<img
+            {user?.role}
 
-src={`http://localhost:5000/uploads/${profile.profile_image}`}
+        </span>
 
-className="
-w-full
-h-full
-object-cover
-"
-
-/>
-
-
-:
-
-
-profile?.name
-
-?
-
-profile.name.charAt(0).toUpperCase()
-
-:
-
-"U"
-
-
-}
-
+    </div>
 
 </div>
 
 
 
-
-<div>
-
-
-<p className="
-font-semibold
-text-gray-800
-">
-
-{profile?.name || user?.name}
-
-</p>
-
-
-
-<span
-
-className="
-text-xs
-px-3
-py-1
-rounded-full
-bg-blue-100
-text-blue-700
-"
-
->
-
-{user?.role}
-
-</span>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
+{/* LOGOUT */}
 
 <button
 
@@ -648,39 +654,26 @@ gap-2
 bg-red-500
 hover:bg-red-600
 text-white
-px-4
+px-3
+lg:px-4
 py-2
 rounded-xl
+transition
+text-sm
 "
-
 >
-
 <FaSignOutAlt/>
 
 Logout
 
 </button>
 
-
-
-
-
-
-
 </div>
-
-
-
-
 
 </header>
 
-
 );
 
-
 }
-
-
 
 export default Navbar;
