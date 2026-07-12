@@ -1,3 +1,5 @@
+admin email-abdulbasit@gmail.com
+admin password-123456
 # NexusHub - Smart Operations Management Portal
 
 NexusHub is a web-based operations management system designed to help organizations manage employees, work requests, resources, notifications, and user profiles efficiently.
