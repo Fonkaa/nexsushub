@@ -132,7 +132,7 @@ message:"Registration failed"
 
 export const login = async(req,res)=>{
 
-
+    console.log("========== LOGIN CONTROLLER CALLED ==========");
 try{
 
 
@@ -173,23 +173,19 @@ message:"User not found"
 const user=result.rows[0];
 
 
+console.log("Email entered:", email);
+console.log("Password entered:", password);
+console.log("User from DB:", user.email);
+console.log("Stored hash:", user.password);
 
-const validPassword =
-bcrypt.compareSync(
-password,
-user.password
-);
+const validPassword = bcrypt.compareSync(password, user.password);
 
+console.log("Password Match:", validPassword);
 
-
-if(!validPassword){
-
-return res.status(401).json({
-
-message:"Wrong password"
-
-});
-
+if (!validPassword) {
+    return res.status(401).json({
+        message: "Wrong password"
+    });
 }
 
 
@@ -474,7 +470,7 @@ const {
 email,
 password
 }=req.body;
-
+console.log("LOGIN DATA:", email, password);
 
 const userResult = await db.query(
 `

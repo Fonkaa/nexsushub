@@ -13,7 +13,9 @@ import teamRoutes from "./routes/teamRoutes.js";
 
 import verifyToken from "./middleware/authMiddleware.js";
 import { getDashboardStats } from "./controllers/dashboardController.js";
-
+console.log("================================");
+console.log("RUNNING SERVER:", import.meta.url);
+console.log("================================");
 dotenv.config();
 
 const app = express();

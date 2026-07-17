@@ -8,7 +8,7 @@ verifyOTP,
 resetPassword
 } from "../controllers/authController.js";
 
-
+console.log("AUTH ROUTES FILE LOADED");
 const router = express.Router();
 
 
