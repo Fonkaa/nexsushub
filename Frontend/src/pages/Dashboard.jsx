@@ -256,24 +256,24 @@ color:"from-red-500 to-red-700"
 
 
 
-const pieData=[
+console.log("Stats:", stats);
 
-{
-name:"Approved",
-value:stats?.approvedRequests || 0
-},
-
-{
-name:"Pending",
-value:stats?.pendingRequests || 0
-},
-
-{
-name:"Rejected",
-value:stats?.rejectedRequests || 0
-}
-
+const pieData = [
+  {
+    name: "Approved",
+    value: Number(stats?.approvedRequests || 0),
+  },
+  {
+    name: "Pending",
+    value: Number(stats?.pendingRequests || 0),
+  },
+  {
+    name: "Rejected",
+    value: Number(stats?.rejectedRequests || 0),
+  },
 ];
+
+console.log("Pie Data:", pieData);
 
 
 
@@ -825,58 +825,16 @@ mb-10
 {/* PIE CHART */}
 
 
-<div className="
-bg-white
-rounded-3xl
-shadow-xl
-p-6
-">
+<div className="bg-white rounded-2xl shadow p-6">
 
-
-<div className="
-flex
-justify-between
-items-center
-mb-5
-">
-
-
-<h2 className="
-text-xl
-font-bold
-">
-
+<h2 className="text-xl font-bold mb-5">
 Request Status
-
 </h2>
 
 
-<div className="
-bg-blue-100
-text-blue-600
-p-3
-rounded-2xl
-">
-
-<FaTasks/>
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div className="
-h-80
-">
-
-
 <ResponsiveContainer
-width="100%"
-height="100%"
+    width="100%"
+    height={300}
 >
 
 
@@ -885,53 +843,50 @@ height="100%"
 
 <Pie
 
-data={pieData}
+data={[
+{
+name:"Pending",
+value:Number(stats.pendingRequests)
+},
 
-cx="50%"
+{
+name:"Approved",
+value:Number(stats.approvedRequests)
+},
 
-cy="50%"
+{
+name:"Rejected",
+value:Number(stats.rejectedRequests)
+}
 
-innerRadius={50}
-
-outerRadius={90}
-
-paddingAngle={5}
+]}
 
 dataKey="value"
+
+cx="50%"
+cy="50%"
+
+outerRadius={100}
+
+label
+
 
 >
 
 
+<Cell fill="#eab308"/>
 
-{
+<Cell fill="#22c55e"/>
 
-pieData.map((entry,index)=>(
-
-
-<Cell
-
-key={index}
-
-fill={COLORS[index]}
-
-/>
-
-
-))
-
-
-}
-
+<Cell fill="#ef4444"/>
 
 
 </Pie>
 
 
-
 <Tooltip/>
 
 <Legend/>
-
 
 
 </PieChart>
@@ -941,12 +896,6 @@ fill={COLORS[index]}
 
 
 </div>
-
-
-
-</div>
-
-
 
 
 

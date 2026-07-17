@@ -24,11 +24,11 @@ const [members,setMembers]=useState([]);
 const [search,setSearch]=useState("");
 
 
+const [form, setForm] = useState({
 
-const [form,setForm]=useState({
-
-    user_id:1,
     full_name:"",
+    username:"",
+    email:"",
     phone:"",
     department:"",
     position:""
@@ -137,23 +137,24 @@ e.preventDefault();
 try{
 
 
-await API.post(
-
-"/team",
-
-form
-
+const res = await API.post(
+    "/team",
+    form
 );
 
 
-
+alert(
+    `Member created successfully.
+Temporary Password: ${res.data.temporaryPassword}`
+);
 setForm({
 
-user_id:1,
-full_name:"",
-phone:"",
-department:"",
-position:""
+    full_name:"",
+    username:"",
+    email:"",
+    phone:"",
+    department:"",
+    position:""
 
 });
 
@@ -165,7 +166,10 @@ fetchMembers();
 
 }catch(error){
 
-console.log(error);
+ alert(
+        error.response?.data?.message ||
+        "Failed to add member"
+    );
 
 }
 
@@ -338,97 +342,80 @@ member.department
 
 return(
 
-
-<div className="
-p-6
-bg-gray-100
-min-h-screen
-">
-
-
-
+<div className="min-h-screen bg-gray-100 p-6">
 
 
 {/* HEADER */}
 
-
-<div className="
-flex
-justify-between
-items-center
-mb-8
-">
+<div className="flex flex-col lg:flex-row justify-between gap-6 mb-8">
 
 
 <div>
 
-
-<h1 className="
-text-4xl
-font-bold
-text-gray-800
-">
-
-Team Management
-
+<h1 className="text-4xl font-black text-gray-800">
+Team Members
 </h1>
 
-
-
-<p className="
-text-gray-500
-mt-2
-">
-
-Manage employees and organization members
-
+<p className="text-gray-500 mt-2 text-lg">
+Manage organization employees, roles and information
 </p>
-
 
 </div>
 
 
+
+<div className="grid grid-cols-2 gap-4">
+
+
+<div className="
+bg-white
+rounded-2xl
+shadow-lg
+px-8
+py-5
+">
+
+<p className="text-gray-400 text-sm">
+Total Members
+</p>
+
+<h2 className="text-3xl font-bold text-blue-600">
+{members.length}
+</h2>
+
+</div>
 
 
 
 <div className="
 bg-white
 rounded-2xl
-shadow
-px-6
-py-4
+shadow-lg
+px-8
+py-5
 ">
 
-
-<p className="
-text-gray-500
-text-sm
-">
-
-Total Members
-
+<p className="text-gray-400 text-sm">
+Active Members
 </p>
 
+<h2 className="text-3xl font-bold text-green-600">
 
-<p className="
-text-3xl
-font-bold
-text-blue-600
-">
+{
+members.filter(
+m=>m.status==="active"
+).length
+}
 
-{members.length}
+</h2>
 
-</p>
+</div>
 
 
 </div>
 
 
-
 </div>
-
-
-
 
 
 
@@ -436,17 +423,13 @@ text-blue-600
 
 {/* ADD MEMBER */}
 
-
-
 {
-
 user?.role==="admin" &&
-
 
 <div className="
 bg-white
 rounded-3xl
-shadow-lg
+shadow-xl
 p-8
 mb-8
 ">
@@ -461,131 +444,63 @@ items-center
 gap-3
 ">
 
+<FaUserPlus className="text-blue-600"/>
 
-<FaUserPlus
-className="text-blue-600"
-/>
-
-
-Add New Team Member
-
+Create New Member
 
 </h2>
 
 
 
-
-
 <form
-
 onSubmit={addMember}
-
 className="
 grid
-md:grid-cols-5
-gap-4
-"
+md:grid-cols-2
+lg:grid-cols-3
+gap-5
+">
 
->
 
+{
+[
+["full_name","Full Name"],
+["username","Username"],
+["email","Email"],
+["phone","Phone"],
+["department","Department"],
+["position","Position"]
+
+].map(([name,placeholder])=>(
 
 <input
 
-name="full_name"
+key={name}
 
-placeholder="Full Name"
+name={name}
 
-value={form.full_name}
+placeholder={placeholder}
+
+value={form[name]}
 
 onChange={handleChange}
 
 className="
 border
 rounded-xl
-p-3
+px-4
+py-3
+outline-none
 focus:ring-2
 focus:ring-blue-500
-outline-none
+transition
 "
 
 />
 
+))
 
-
-
-
-<input
-
-name="phone"
-
-placeholder="Phone"
-
-value={form.phone}
-
-onChange={handleChange}
-
-className="
-border
-rounded-xl
-p-3
-focus:ring-2
-focus:ring-blue-500
-outline-none
-"
-
-/>
-
-
-
-
-
-<input
-
-name="department"
-
-placeholder="Department"
-
-value={form.department}
-
-onChange={handleChange}
-
-className="
-border
-rounded-xl
-p-3
-focus:ring-2
-focus:ring-blue-500
-outline-none
-"
-
-/>
-
-
-
-
-
-<input
-
-name="position"
-
-placeholder="Position"
-
-value={form.position}
-
-onChange={handleChange}
-
-className="
-border
-rounded-xl
-p-3
-focus:ring-2
-focus:ring-blue-500
-outline-none
-"
-
-/>
-
-
+}
 
 
 
@@ -597,27 +512,22 @@ from-blue-600
 to-purple-600
 text-white
 rounded-xl
-font-semibold
+font-bold
 hover:scale-105
 transition
 "
 
 >
 
-
 Add Member
 
-
 </button>
-
 
 
 </form>
 
 
-
 </div>
-
 
 }
 
@@ -625,14 +535,20 @@ Add Member
 
 
 
-
 {/* SEARCH */}
 
+<div className="
+bg-white
+rounded-2xl
+shadow
+p-5
+mb-6
+">
 
 
 <input
 
-placeholder="Search team members..."
+placeholder="Search members by name or department..."
 
 value={search}
 
@@ -641,12 +557,10 @@ onChange={(e)=>setSearch(e.target.value)}
 className="
 w-full
 md:w-96
-mb-8
-bg-white
 border
-rounded-2xl
-p-4
-shadow-sm
+rounded-xl
+px-5
+py-3
 outline-none
 focus:ring-2
 focus:ring-blue-500
@@ -655,377 +569,171 @@ focus:ring-blue-500
 />
 
 
-
-
-
-
-
-{/* CARDS START */}
-
-<div className="
-grid
-md:grid-cols-3
-gap-6
-"></div>
-{
-
-filteredMembers.length===0 ?
-
-
-<div className="
-bg-white
-rounded-3xl
-shadow
-p-10
-text-center
-text-gray-500
-col-span-3
-">
-
-No team members found
-
 </div>
 
 
 
-:
-
-
-filteredMembers.map((member)=>(
 
 
 
-<div
 
-key={member.id}
+{/* TABLE */}
 
-className="
+
+<div className="
 bg-white
 rounded-3xl
-shadow-md
-hover:shadow-xl
-transition
-p-6
-"
-
->
+shadow-xl
+overflow-hidden
+">
 
 
-
-
-
-{
-
-editing===member.id ?
-
-
-
-/* EDIT MODE */
-
-(
-
-<div>
-
+<div className="
+px-6
+py-5
+border-b
+">
 
 <h2 className="
 text-xl
 font-bold
-mb-5
 text-gray-800
 ">
 
-Edit Member
+Employee Directory
 
 </h2>
 
-
-
-
-
-<input
-
-value={editForm.full_name}
-
-onChange={(e)=>
-
-setEditForm({
-
-...editForm,
-
-full_name:e.target.value
-
-})
-
-}
-
-className="
-w-full
-border
-rounded-xl
-p-3
-mb-3
-"
-
-/>
-
-
-
-
-
-
-
-<input
-
-value={editForm.phone}
-
-onChange={(e)=>
-
-setEditForm({
-
-...editForm,
-
-phone:e.target.value
-
-})
-
-}
-
-className="
-w-full
-border
-rounded-xl
-p-3
-mb-3
-"
-
-/>
-
-
-
-
-
-
-
-<input
-
-value={editForm.department}
-
-onChange={(e)=>
-
-setEditForm({
-
-...editForm,
-
-department:e.target.value
-
-})
-
-}
-
-className="
-w-full
-border
-rounded-xl
-p-3
-mb-3
-"
-
-/>
-
-
-
-
-
-
-
-<input
-
-value={editForm.position}
-
-onChange={(e)=>
-
-setEditForm({
-
-...editForm,
-
-position:e.target.value
-
-})
-
-}
-
-className="
-w-full
-border
-rounded-xl
-p-3
-mb-3
-"
-
-/>
-
-
-
-
-
-
-
-
-<select
-
-value={editForm.status}
-
-onChange={(e)=>
-
-setEditForm({
-
-...editForm,
-
-status:e.target.value
-
-})
-
-}
-
-className="
-w-full
-border
-rounded-xl
-p-3
-mb-5
-"
-
->
-
-
-<option value="active">
-
-Active
-
-</option>
-
-
-<option value="inactive">
-
-Inactive
-
-</option>
-
-
-</select>
-
-
-
-
-
+</div>
 
 
 
 <div className="
-flex
-gap-3
+overflow-x-auto
 ">
 
 
-<button
+<table className="
+w-full
+text-left
+">
 
-onClick={()=>saveEdit(member.id)}
 
+<thead className="
+bg-gray-50
+text-gray-500
+text-sm
+uppercase
+">
+
+
+<tr>
+
+
+<th className="px-6 py-4">
+Employee
+</th>
+
+
+<th className="px-6 py-4">
+Contact
+</th>
+
+
+<th className="px-6 py-4">
+Department
+</th>
+
+
+<th className="px-6 py-4">
+Position
+</th>
+
+
+<th className="px-6 py-4">
+Status
+</th>
+
+
+{
+user?.role==="admin" &&
+
+<th className="px-6 py-4">
+Actions
+</th>
+
+}
+
+
+
+</tr>
+
+
+</thead>
+
+
+
+
+
+<tbody>
+
+
+{
+
+filteredMembers.length===0 ?
+
+<tr>
+
+<td
+colSpan="6"
 className="
-flex
-items-center
-gap-2
-bg-green-600
-hover:bg-green-700
-text-white
-px-5
-py-3
-rounded-xl
-font-semibold
-transition
+text-center
+py-16
+text-gray-500
 "
-
 >
 
+No team members found
 
-<FaSave/>
+</td>
 
-Save
-
-
-</button>
-
-
-
-
-
-
-
-<button
-
-onClick={()=>setEditing(null)}
-
-className="
-flex
-items-center
-gap-2
-bg-gray-500
-hover:bg-gray-600
-text-white
-px-5
-py-3
-rounded-xl
-font-semibold
-transition
-"
-
->
-
-
-<FaTimes/>
-
-Cancel
-
-
-</button>
-
-
-</div>
-
-
-
-</div>
-
-
-)
-
-
+</tr>
 
 
 
 :
 
 
+filteredMembers.map(member=>(
 
 
-/* NORMAL CARD */
+<tr
 
-(
+key={member.id}
+
+className="
+border-b
+hover:bg-gray-50
+transition
+"
 
 
-<>
+>
+
+
+<td className="px-6 py-5">
 
 
 <div className="
 flex
-justify-between
-items-start
+items-center
+gap-4
 ">
 
 
 <div className="
-w-14
-h-14
+w-12
+h-12
 rounded-full
 bg-gradient-to-r
 from-blue-600
@@ -1034,15 +742,15 @@ text-white
 flex
 items-center
 justify-center
-text-2xl
 font-bold
+text-lg
 ">
 
 
 {
-
-member.full_name.charAt(0)
-
+member.full_name
+?.charAt(0)
+?.toUpperCase()
 }
 
 
@@ -1050,6 +758,110 @@ member.full_name.charAt(0)
 
 
 
+<div>
+
+<p className="
+font-bold
+text-gray-800
+">
+
+{member.full_name}
+
+</p>
+
+
+<p className="
+text-sm
+text-gray-400
+">
+
+@{member.username}
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+</td>
+
+
+
+
+
+
+<td className="px-6 py-5">
+
+
+<p className="text-gray-700">
+
+{member.email}
+
+</p>
+
+
+<p className="text-sm text-gray-400">
+
+{member.phone}
+
+</p>
+
+
+</td>
+
+
+
+
+
+
+
+<td className="px-6 py-5">
+
+
+<span className="
+bg-blue-100
+text-blue-700
+px-4
+py-2
+rounded-full
+text-sm
+font-semibold
+">
+
+
+{member.department}
+
+
+</span>
+
+
+</td>
+
+
+
+
+
+
+
+<td className="px-6 py-5 text-gray-700 font-medium">
+
+
+{member.position}
+
+
+</td>
+
+
+
+
+
+
+
+<td className="px-6 py-5">
 
 
 <span className={
@@ -1058,110 +870,22 @@ member.status==="active"
 
 ?
 
-"bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-semibold"
+"bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold"
 
 :
 
-"bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm font-semibold"
+"bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-semibold"
 
 }>
 
 
-{
-
-member.status
-
-}
+{member.status}
 
 
 </span>
 
 
-</div>
-
-
-
-
-
-
-
-
-<h2 className="
-text-2xl
-font-bold
-mt-5
-text-gray-800
-">
-
-{member.full_name}
-
-</h2>
-
-
-
-
-
-
-
-
-<div className="
-mt-5
-space-y-3
-text-gray-600
-">
-
-
-<p>
-
-📞
-
-<span className="ml-2">
-
-{member.phone}
-
-</span>
-
-
-</p>
-
-
-
-
-
-<p>
-
-🏢
-
-<span className="ml-2">
-
-{member.department}
-
-</span>
-
-
-</p>
-
-
-
-
-
-
-<p>
-
-💼
-
-<span className="ml-2">
-
-{member.position}
-
-</span>
-
-
-</p>
-
-
-</div>
-
+</td>
 
 
 
@@ -1175,12 +899,12 @@ text-gray-600
 user?.role==="admin" &&
 
 
+<td className="px-6 py-5">
+
 
 <div className="
-mt-6
 flex
 gap-3
-flex-wrap
 ">
 
 
@@ -1189,30 +913,19 @@ flex-wrap
 onClick={()=>startEdit(member)}
 
 className="
-flex
-items-center
-gap-2
 bg-blue-600
 hover:bg-blue-700
 text-white
-px-5
-py-2
+p-3
 rounded-xl
-font-semibold
 transition
 "
 
 >
 
-
 <FaEdit/>
 
-Edit
-
-
 </button>
-
-
 
 
 
@@ -1223,26 +936,17 @@ Edit
 onClick={()=>deleteMember(member.id)}
 
 className="
-flex
-items-center
-gap-2
 bg-red-600
 hover:bg-red-700
 text-white
-px-5
-py-2
+p-3
 rounded-xl
-font-semibold
 transition
 "
 
 >
 
-
 <FaTrash/>
-
-Delete
-
 
 </button>
 
@@ -1251,14 +955,7 @@ Delete
 </div>
 
 
-}
-
-
-
-
-</>
-
-)
+</td>
 
 
 }
@@ -1266,21 +963,31 @@ Delete
 
 
 
-</div>
+</tr>
 
 
 ))
 
+
 }
 
+
+</tbody>
+
+
+</table>
+
+
+</div>
 
 
 </div>
 
 
 
-);
+</div>
 
+);
 
 }
 

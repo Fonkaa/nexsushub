@@ -1,13 +1,20 @@
 import db from "../config/db.js";
+import bcrypt from "bcrypt";
 
 
 
+
+// ==========================
 // GET ALL TEAM MEMBERS
+// ==========================
 
-export const getTeamMembers = (req,res)=>{
+export const getTeamMembers = async(req,res)=>{
 
 
-const sql=`
+try{
+
+
+const result = await db.query(`
 
 SELECT *
 
@@ -15,29 +22,28 @@ FROM team_members
 
 ORDER BY id DESC
 
-`;
+`);
 
 
 
-db.query(sql,(err,result)=>{
+res.json(result.rows);
 
 
-if(err){
 
-return res.status(500).json({
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
 
 message:"Failed to fetch team members"
 
 });
 
+
 }
-
-
-
-res.json(result);
-
-
-});
 
 
 };
@@ -50,15 +56,21 @@ res.json(result);
 
 
 
+// ==========================
 // CREATE TEAM MEMBER
+// ==========================
 
-export const createTeamMember=(req,res)=>{
+export const createTeamMember = async(req,res)=>{
+
+
+try{
 
 
 const {
 
-user_id,
 full_name,
+username,
+email,
 phone,
 department,
 position
@@ -67,8 +79,143 @@ position
 
 
 
+if(
+!full_name ||
+!username ||
+!email ||
+!phone ||
+!department ||
+!position
+){
 
-const sql=`
+
+return res.status(400).json({
+
+message:"Please fill all fields"
+
+});
+
+
+}
+
+
+
+
+
+
+// CHECK DUPLICATE USER
+
+const checkUser = await db.query(`
+
+
+SELECT *
+
+FROM users
+
+WHERE email=$1 OR username=$2
+
+
+`,
+[
+email,
+username
+]
+
+);
+
+
+
+if(checkUser.rows.length > 0){
+
+
+return res.status(409).json({
+
+message:"Email or username already exists"
+
+});
+
+
+}
+
+
+
+
+
+
+
+// CREATE TEMP PASSWORD
+
+const temporaryPassword =
+"Nexus@" + Math.floor(10000 + Math.random()*90000);
+
+
+
+const hashedPassword =
+bcrypt.hashSync(
+temporaryPassword,
+10
+);
+
+
+
+
+
+
+
+// CREATE USER ACCOUNT
+
+const userResult = await db.query(`
+
+
+INSERT INTO users
+
+(
+name,
+username,
+email,
+password,
+role,
+first_login
+)
+
+
+VALUES
+($1,$2,$3,$4,$5,$6)
+
+
+RETURNING id
+
+
+`,
+[
+full_name,
+username,
+email,
+hashedPassword,
+"employee",
+true
+]
+
+);
+
+
+
+const userId =
+userResult.rows[0].id;
+
+
+
+
+
+
+
+
+
+// CREATE TEAM PROFILE
+
+
+await db.query(`
+
 
 INSERT INTO team_members
 
@@ -81,52 +228,50 @@ position,
 status
 )
 
-VALUES(?,?,?,?,?,?)
 
-`;
+VALUES
+($1,$2,$3,$4,$5,$6)
 
 
-
-db.query(
-
-sql,
-
+`,
 [
-user_id,
+userId,
 full_name,
 phone,
 department,
 position,
-"active"
-],
+"Active"
+]
 
-(err,result)=>{
+);
 
 
-if(err){
-
-return res.status(500).json({
-
-message:"Failed to add member"
-
-});
-
-}
 
 
 
 res.status(201).json({
 
-message:"Member added successfully",
+message:"Team member created successfully",
 
-id:result.insertId
+temporaryPassword
 
 });
 
 
-}
 
-);
+
+
+}catch(error){
+
+console.log("GET TEAM ERROR:", error.message);
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+}
 
 
 };
@@ -139,9 +284,16 @@ id:result.insertId
 
 
 
-// UPDATE TEAM MEMBER
 
-export const updateTeamMember=(req,res)=>{
+
+// ==========================
+// UPDATE TEAM MEMBER
+// ==========================
+
+export const updateTeamMember = async(req,res)=>{
+
+
+try{
 
 
 const {id}=req.params;
@@ -161,60 +313,47 @@ status
 
 
 
-const sql=`
+await db.query(`
+
 
 UPDATE team_members
 
 SET
 
-full_name=?,
+full_name=$1,
 
-phone=?,
+phone=$2,
 
-department=?,
+department=$3,
 
-position=?,
+position=$4,
 
-status=?
-
-WHERE id=?
-
-`;
+status=$5
 
 
+WHERE id=$6
 
 
-db.query(
-
-sql,
-
+`,
 [
 
 full_name,
+
 phone,
+
 department,
+
 position,
+
 status,
+
 id
 
-],
+]
+
+);
 
 
-(err)=>{
-
-
-if(err){
-
-console.log(err);
-
-
-return res.status(500).json({
-
-message:"Update failed"
-
-});
-
-}
 
 
 
@@ -225,10 +364,22 @@ message:"Member updated successfully"
 });
 
 
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Update failed"
+
+});
+
+
 }
-
-
-);
 
 
 };
@@ -241,40 +392,34 @@ message:"Member updated successfully"
 
 
 
-// DELETE MEMBER
+// ==========================
+// DELETE TEAM MEMBER
+// ==========================
+
+export const deleteTeamMember = async(req,res)=>{
 
 
-export const deleteTeamMember=(req,res)=>{
+try{
 
 
 const {id}=req.params;
 
 
 
-db.query(
+await db.query(`
 
-`
+
 DELETE FROM team_members
 
-WHERE id=?
+WHERE id=$1
+
 
 `,
+[
+id
+]
 
-[id],
-
-
-(err)=>{
-
-
-if(err){
-
-return res.status(500).json({
-
-message:"Delete failed"
-
-});
-
-}
+);
 
 
 
@@ -285,10 +430,21 @@ message:"Member deleted"
 });
 
 
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Delete failed"
+
+});
+
+
 }
-
-
-);
 
 
 };

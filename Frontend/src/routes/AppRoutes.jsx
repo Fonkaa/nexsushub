@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import Unauthorized from "../pages/Unauthorized";
 import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "../pages/Dashboard";
 import TeamMembers from "../pages/TeamMembers";
@@ -10,11 +10,12 @@ import SearchResults from "../pages/SearchResults";
 import HomePage from "../pages/HomePage";
 import { Register } from "../pages/Register.jsx";
 import MainLayout from "../layouts/MainLayout";
-
+import Viewer from "../pages/Viewer";
 import Login from "../pages/Login";
 import Profile from "../pages/Profile";
-
-
+import ResetPassword from "../pages/ResetPassword";
+import ForgotPassword from "../pages/ForgotPassword";
+import VerifyOTP from "../pages/VerifyOTP";
 function AppRoutes(){
 
 
@@ -44,15 +45,59 @@ element={<Register/>}
 />
 
 {/* DASHBOARD */}
+<Route
 
+path="/unauthorized"
 
+element={<Unauthorized/>}
+
+/>
+<Route
+path="/forgot-password"
+element={<ForgotPassword/>}
+/>
+<Route 
+path="/reset-password" 
+element={<ResetPassword />} 
+/>
+<Route
+path="/verify-otp"
+element={<VerifyOTP/>}
+/>
+<Route
+
+path="/viewer"
+
+element={
+
+<ProtectedRoute
+allowedRoles={[
+"viewer"
+]}
+>
+<MainLayout>
+
+<Viewer/>
+
+</MainLayout>
+
+</ProtectedRoute>
+
+}
+
+/>
 <Route
 
 path="/dashboard"
 
 element={
 
-<ProtectedRoute>
+<ProtectedRoute
+allowedRoles={[
+"admin",
+"employee"
+]}
+>
 
 <MainLayout>
 
@@ -136,8 +181,11 @@ element={
 path="/team-members"
 
 element={
-
-<ProtectedRoute role="admin">
+<ProtectedRoute
+allowedRoles={[
+"admin"
+]}
+>
 
 <MainLayout>
 

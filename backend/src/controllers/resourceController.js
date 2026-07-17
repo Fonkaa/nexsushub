@@ -2,40 +2,46 @@ import db from "../config/db.js";
 
 
 
+// ==========================
 // GET ALL RESOURCES
+// ==========================
 
-export const getResources = (req,res)=>{
-
-
-    const sql = `
-
-        SELECT *
-
-        FROM resources
-
-        ORDER BY id DESC
-
-    `;
+export const getResources = async(req,res)=>{
 
 
-    db.query(sql,(err,result)=>{
+try{
 
 
-        if(err){
+const result = await db.query(`
 
-            return res.status(500).json({
+SELECT *
 
-                message:"Failed to fetch resources"
+FROM resources
 
-            });
+ORDER BY id DESC
 
-        }
-
-
-        res.json(result);
+`);
 
 
-    });
+
+res.json(result.rows);
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Failed to fetch resources"
+
+});
+
+
+}
 
 
 };
@@ -46,76 +52,80 @@ export const getResources = (req,res)=>{
 
 
 
+// ==========================
 // CREATE RESOURCE
+// ==========================
 
-export const createResource = (req,res)=>{
-
-
-    const {
-        name,
-        category,
-        quantity
-    } = req.body;
+export const createResource = async(req,res)=>{
 
 
+try{
 
-    const sql = `
 
-        INSERT INTO resources
-
-        (
-            name,
-            category,
-            quantity,
-            available
-        )
-
-        VALUES(?,?,?,?)
-
-    `;
+const {
+name,
+category,
+quantity
+}=req.body;
 
 
 
-    db.query(
-
-        sql,
-
-        [
-            name,
-            category,
-            quantity,
-            true
-        ],
+const result = await db.query(`
 
 
-        (err,result)=>{
+INSERT INTO resources
+
+(
+name,
+category,
+quantity,
+available
+)
 
 
-            if(err){
-
-                return res.status(500).json({
-
-                    message:"Resource creation failed"
-
-                });
-
-            }
+VALUES
+($1,$2,$3,$4)
 
 
+RETURNING id
 
-            res.status(201).json({
 
-                message:"Resource created successfully",
+`,
+[
+name,
+category,
+quantity,
+true
+]
 
-                id:result.insertId
-
-            });
+);
 
 
 
-        }
+res.status(201).json({
 
-    );
+message:"Resource created successfully",
+
+id:result.rows[0].id
+
+});
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Resource creation failed"
+
+});
+
+
+}
 
 
 };
@@ -128,69 +138,64 @@ export const createResource = (req,res)=>{
 
 
 
-
+// ==========================
 // UPDATE AVAILABILITY
+// ==========================
+
+export const updateResource = async(req,res)=>{
 
 
-export const updateResource = (req,res)=>{
+try{
 
 
-    const {id}=req.params;
+const {id}=req.params;
 
-
-    const {available}=req.body;
-
-
-
-    const sql = `
-
-        UPDATE resources
-
-        SET available=?
-
-        WHERE id=?
-
-    `;
+const {available}=req.body;
 
 
 
-    db.query(
-
-        sql,
-
-        [
-            available,
-            id
-        ],
+await db.query(`
 
 
-        (err)=>{
+UPDATE resources
+
+SET available=$1
+
+WHERE id=$2
 
 
-            if(err){
+`,
+[
+available,
+id
+]
 
-                return res.status(500).json({
-
-                    message:"Availability update failed"
-
-                });
-
-            }
+);
 
 
 
-            res.json({
+res.json({
 
-                message:"Availability updated"
+message:"Availability updated"
 
-            });
-
-
-
-        }
+});
 
 
-    );
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Availability update failed"
+
+});
+
+
+}
 
 
 };
@@ -203,87 +208,78 @@ export const updateResource = (req,res)=>{
 
 
 
-
-
+// ==========================
 // EDIT RESOURCE DETAILS
+// ==========================
+
+export const editResource = async(req,res)=>{
 
 
-export const editResource = (req,res)=>{
+try{
 
 
-    const {id}=req.params;
+const {id}=req.params;
 
 
-    const {
-
-        name,
-        category,
-        quantity
-
-    } = req.body;
-
-
-
-
-    const sql = `
-
-
-        UPDATE resources
-
-        SET
-
-        name=?,
-        category=?,
-        quantity=?
-
-
-        WHERE id=?
-
-
-    `;
+const {
+name,
+category,
+quantity
+}=req.body;
 
 
 
-
-    db.query(
-
-        sql,
-
-        [
-
-            name,
-            category,
-            quantity,
-            id
-
-        ],
+await db.query(`
 
 
-        (err)=>{
+UPDATE resources
+
+SET
+
+name=$1,
+
+category=$2,
+
+quantity=$3
 
 
-            if(err){
-
-                return res.status(500).json({
-
-                    message:"Resource edit failed"
-
-                });
-
-            }
+WHERE id=$4
 
 
+`,
+[
+name,
+category,
+quantity,
+id
+]
 
-            res.json({
-
-                message:"Resource updated successfully"
-
-            });
+);
 
 
-        }
 
-    );
+res.json({
+
+message:"Resource updated successfully"
+
+});
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Resource edit failed"
+
+});
+
+
+}
 
 
 };
@@ -296,62 +292,59 @@ export const editResource = (req,res)=>{
 
 
 
-
-
-
+// ==========================
 // DELETE RESOURCE
+// ==========================
+
+export const deleteResource = async(req,res)=>{
 
 
-export const deleteResource=(req,res)=>{
+try{
 
 
-    const {id}=req.params;
-
-
-
-    const sql=`
-
-        DELETE FROM resources
-
-        WHERE id=?
-
-    `;
+const {id}=req.params;
 
 
 
-    db.query(
-
-        sql,
-
-        [id],
+await db.query(`
 
 
-        (err)=>{
+DELETE FROM resources
+
+WHERE id=$1
 
 
-            if(err){
+`,
+[
+id
+]
 
-                return res.status(500).json({
-
-                    message:"Delete failed"
-
-                });
-
-            }
+);
 
 
 
-            res.json({
+res.json({
 
-                message:"Resource deleted"
+message:"Resource deleted"
 
-            });
+});
 
 
 
-        }
+}catch(error){
 
-    );
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Delete failed"
+
+});
+
+
+}
 
 
 };

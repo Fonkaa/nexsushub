@@ -1,101 +1,123 @@
 import db from "../config/db.js";
-
 import createNotification from "../utils/createNotification.js";
-// Get all work requests
-// Get work requests
-export const getWorkRequests = (req, res) => {
-
-
-    let sql = `
-
-    SELECT 
-
-        work_requests.*,
-
-        users.name AS requester_name,
-
-        team_members.full_name AS assigned_name
-
-    FROM work_requests
-
-
-    JOIN users
-
-    ON work_requests.requester_id = users.id
-
-
-    LEFT JOIN team_members
-
-    ON work_requests.assigned_to = team_members.id
-
-    `;
-
-
-
-    let params = [];
-
-
-
-    // Employee sees only his own requests
-    if(req.user.role !== "admin"){
-
-
-        sql += `
-
-        WHERE work_requests.requester_id = ?
-
-        `;
-
-
-        params.push(req.user.id);
-
-
-    }
-
-
-
-    sql += `
-
-    ORDER BY work_requests.created_at DESC
-
-    `;
 
 
 
 
-    db.query(
+// ==========================
+// GET ALL WORK REQUESTS
+// ==========================
 
-        sql,
-
-        params,
-
-        (err,result)=>{
+export const getWorkRequests = async(req,res)=>{
 
 
-            if(err){
-
-                console.log(
-                    "GET REQUEST ERROR:",
-                    err
-                );
+try{
 
 
-                return res.status(500).json({
-
-                    message:err.message
-
-                });
-
-            }
+let query = `
 
 
+SELECT
 
-            res.json(result);
+
+work_requests.*,
 
 
-        }
+users.name AS requester_name,
 
-    );
+
+team_members.full_name AS assigned_name
+
+
+
+FROM work_requests
+
+
+
+JOIN users
+
+ON work_requests.requester_id = users.id
+
+
+
+LEFT JOIN team_members
+
+ON work_requests.assigned_to = team_members.id
+
+
+
+`;
+
+
+
+let values=[];
+
+
+
+if(req.user.role !== "admin"){
+
+query += `
+
+WHERE 
+work_requests.requester_id=$1
+OR 
+work_requests.assigned_to IN (
+
+SELECT id 
+FROM team_members
+WHERE user_id=$1
+
+)
+
+`;
+
+values.push(req.user.id);
+
+}
+
+
+
+query += `
+
+ORDER BY work_requests.created_at DESC
+
+`;
+
+
+
+
+const result = await db.query(
+
+query,
+
+values
+
+);
+
+
+
+res.json(result.rows);
+
+
+
+}catch(error){
+
+
+console.log(
+"GET REQUEST ERROR:",
+error
+);
+
+
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+
+}
 
 
 };
@@ -103,103 +125,99 @@ export const getWorkRequests = (req, res) => {
 
 
 
-// Create new work request
-export const createWorkRequest = (req, res) => {
-
-    const {
-        title,
-        description,
-        priority
-    } = req.body;
 
 
 
-    const requester_id = req.user.id;
-
-    const status = "Pending";
-
-    const assigned_to = null;
 
 
+// ==========================
+// CREATE WORK REQUEST
+// ==========================
 
-    const sql = `
-        INSERT INTO work_requests
-        (
-            title,
-            description,
-            requester_id,
-            priority,
-            status,
-            assigned_to
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
+export const createWorkRequest = async(req,res)=>{
 
 
-
-    db.query(
-        sql,
-        [
-            title,
-            description,
-            requester_id,
-            priority,
-            status,
-            assigned_to
-        ],
-        (err, result) => {
+try{
 
 
-            if (err) {
+const {
 
-                console.log("CREATE REQUEST ERROR:", err);
+title,
+description,
+priority
 
-                return res.status(500).json({
-                    message: err.message
-                });
-
-            }
+}=req.body;
 
 
 
-         // Notify all admins
+const result = await db.query(`
 
-db.query(
 
-`
-SELECT id 
+INSERT INTO work_requests
+
+(
+title,
+description,
+requester_id,
+priority,
+status,
+assigned_to
+)
+
+
+VALUES
+
+($1,$2,$3,$4,$5,$6)
+
+
+RETURNING id
+
+
+`,
+[
+
+title,
+
+description,
+
+req.user.id,
+
+priority,
+
+"Pending",
+
+null
+
+]
+
+);
+
+
+
+
+
+// GET ADMINS
+
+const admins = await db.query(`
+
+
+SELECT id
+
 FROM users
+
 WHERE role='admin'
-`,
-
-(err,admins)=>{
 
 
-if(!err){
+`);
 
 
-admins.forEach(admin=>{
 
 
-// Get requester name first
-
-db.query(
-
-`
-SELECT name
-FROM users
-WHERE id=?
-`,
-
-[req.user.id],
-
-(err,userResult)=>{
 
 
-if(!err && userResult.length > 0){
+// SEND NOTIFICATIONS
 
-
-admins.forEach(admin=>{
+admins.rows.forEach(admin=>{
 
 
 createNotification(
@@ -208,7 +226,7 @@ admin.id,
 
 req.user.id,
 
-`New work request submitted`,
+"New work request submitted",
 
 "request"
 
@@ -218,24 +236,8 @@ req.user.id,
 });
 
 
-}
 
 
-}
-
-);
-
-
-});
-
-
-}
-
-
-}
-
-
-);
 
 
 
@@ -243,184 +245,177 @@ res.status(201).json({
 
 message:"Work request created successfully",
 
-id:result.insertId
+id:result.rows[0].id
 
 });
 
 
-        }
-    );
 
-};
+}catch(error){
 
 
-
-
-
-// Update request status and assigned user
-export const deleteWorkRequest=(req,res)=>{
-
-
-    if(req.user.role !== "admin"){
-
-
-        return res.status(403).json({
-
-            message:"Only admin can delete requests"
-
-        });
-
-
-    }
+console.log(
+"CREATE REQUEST ERROR:",
+error
+);
 
 
 
-    const {id}=req.params;
+res.status(500).json({
+
+message:error.message
+
+});
 
 
-
-    const sql=`
-
-    DELETE FROM work_requests
-
-    WHERE id=?
-
-    `;
-
-
-
-    db.query(
-
-        sql,
-
-        [id],
-
-        (err,result)=>{
-
-
-            if(err){
-
-                return res.status(500).json({
-
-                    message:err.message
-
-                });
-
-            }
-
-
-
-            res.json({
-
-                message:"Request deleted successfully"
-
-            });
-
-
-        }
-
-
-    );
+}
 
 
 };
-// Assign request to team member
-export const assignRequest=(req,res)=>{
-
-
-    if(req.user.role !== "admin"){
-
-
-        return res.status(403).json({
-
-            message:"Only admin can assign requests"
-
-        });
-
-    }
 
 
 
-    const {id}=req.params;
-
-    const {assigned_to}=req.body;
 
 
 
-    const sql=`
-
-    UPDATE work_requests
-
-    SET assigned_to=?
-
-    WHERE id=?
-
-    `;
 
 
 
-    db.query(
+// ==========================
+// DELETE WORK REQUEST
+// ==========================
 
-        sql,
-
-        [
-            assigned_to,
-            id
-        ],
+export const deleteWorkRequest = async(req,res)=>{
 
 
-        (err,result)=>{
+try{
 
 
-            if(err){
-
-                return res.status(500).json({
-
-                    message:err.message
-
-                });
-
-            }
+if(req.user.role !== "admin"){
 
 
-          // get assigned member user_id
+return res.status(403).json({
 
-db.query(
+message:"Only admin can delete requests"
 
-`
-SELECT user_id, full_name
-FROM team_members
-WHERE id=?
+});
+
+
+}
+
+
+
+const {id}=req.params;
+
+
+
+await db.query(`
+
+
+DELETE FROM work_requests
+
+WHERE id=$1
+
+
 `,
+[
+id
+]
 
-[assigned_to],
-
-(err,result)=>{
-
-
-if(!err && result.length>0){
+);
 
 
-createNotification(
 
-result[0].user_id,
+res.json({
+
+message:"Request deleted successfully"
+
+});
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:error.message
+
+});
+
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+
+// ==========================
+// ASSIGN REQUEST
+// ==========================
+
+export const assignRequest = async(req,res)=>{
+
+try{
+
+
+const {id}=req.params;
+
+const {assigned_to}=req.body;
+
+
+await db.query(
+`
+UPDATE work_requests
+SET assigned_to=$1
+WHERE id=$2
+`,
+[
+assigned_to,
+id
+]
+);
+
+
+
+const member = await db.query(
+`
+SELECT user_id
+FROM team_members
+WHERE id=$1
+`,
+[
+assigned_to
+]
+);
+
+
+
+if(member.rows.length > 0){
+
+await createNotification(
+
+member.rows[0].user_id,
 
 req.user.id,
 
-`You have been assigned a new work request`,
+"You have been assigned a new work request",
 
 "assignment"
 
 );
 
-
 }
-
-
-}
-
-
-);
 
 
 
@@ -431,124 +426,138 @@ message:"Request assigned successfully"
 });
 
 
-        }
+}catch(error){
+
+console.log(
+"ASSIGN ERROR:",
+error
+);
 
 
-    );
+res.status(500).json({
 
+message:error.message
+
+});
+
+
+}
 
 };
-// UPDATE REQUEST STATUS (ADMIN ONLY)
-
-export const updateWorkRequest = (req, res) => {
-
-
-    if(req.user.role !== "admin"){
-
-
-        return res.status(403).json({
-
-            message:"Only admin can update request status"
-
-        });
-
-
-    }
-
-
-
-    const { id } = req.params;
-
-    const { status } = req.body;
-
-
-
-    const updateSql = `
-
-    UPDATE work_requests
-
-    SET status=?
-
-    WHERE id=?
-
-    `;
-
-
-
-    db.query(
-
-        updateSql,
-
-        [
-            status,
-            id
-        ],
-
-        (err)=>{
-
-
-            if(err){
-
-                console.log(
-                    "UPDATE REQUEST ERROR:",
-                    err
-                );
-
-
-                return res.status(500).json({
-
-                    message:"Failed to update request"
-
-                });
-
-
-            }
 
 
 
 
 
-            // Find request owner to send notification
-
-            db.query(
-
-                `
-
-                SELECT requester_id, title
-
-                FROM work_requests
-
-                WHERE id=?
-
-                `,
-
-                [id],
-
-                (error,result)=>{
 
 
-                    if(!error && result.length > 0){
+
+
+// ==========================
+// UPDATE REQUEST STATUS
+// ==========================
+
+export const updateWorkRequest = async(req,res)=>{
+
+
+try{
+
+
+if(req.user.role !== "admin"){
+
+
+return res.status(403).json({
+
+message:"Only admin can update request status"
+
+});
+
+
+}
+
+
+
+const {id}=req.params;
+
+const {status}=req.body;
+
+
+
+
+
+await db.query(`
+
+
+UPDATE work_requests
+
+SET status=$1
+
+WHERE id=$2
+
+
+`,
+[
+status,
+id
+]
+
+);
+
+
+
+
+
+
+
+// FIND REQUEST OWNER
+
+
+const request = await db.query(`
+
+
+SELECT
+
+requester_id,
+
+title
+
+
+FROM work_requests
+
+WHERE id=$1
+
+
+`,
+[
+id
+]
+
+);
+
+
+
+
+
+
+if(request.rows.length > 0){
+
+
 
 createNotification(
 
-result[0].requester_id,
+request.rows[0].requester_id,
 
 req.user.id,
 
-`Your request "${result[0].title}" was ${status.toLowerCase()}`,
+`Your request "${request.rows[0].title}" was ${status.toLowerCase()}`,
 
 "request_status"
 
 );
 
 
-                    }
 
-
-                }
-
-
-            );
+}
 
 
 
@@ -556,18 +565,31 @@ req.user.id,
 
 
 
-            res.json({
+res.json({
 
-                message:"Request status updated successfully"
+message:"Request status updated successfully"
 
-            });
-
-
-
-        }
+});
 
 
-    );
+
+}catch(error){
+
+
+console.log(
+"UPDATE REQUEST ERROR:",
+error
+);
+
+
+res.status(500).json({
+
+message:"Failed to update request"
+
+});
+
+
+}
 
 
 };

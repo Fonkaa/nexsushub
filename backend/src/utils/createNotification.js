@@ -1,7 +1,7 @@
 import db from "../config/db.js";
 
 
-const createNotification = (
+const createNotification = async(
     user_id,
     sender_id,
     message,
@@ -9,50 +9,45 @@ const createNotification = (
 )=>{
 
 
-const sql = `
+try{
 
+
+await db.query(
+
+`
 INSERT INTO notifications
-
 (
- user_id,
- sender_id,
- message,
- type,
- is_read
+user_id,
+sender_id,
+message,
+type,
+is_read
 )
 
-VALUES(?,?,?,?,?)
+VALUES($1,$2,$3,$4,$5)
 
-`;
-
-
-
-db.query(
-
-sql,
-
+`,
 [
 user_id,
 sender_id,
 message,
 type,
-0
-],
+false
+]
 
-(err)=>{
+);
 
-if(err){
+
+}catch(error){
+
 
 console.log(
-"Notification error:",
-err
+"Notification creation error:",
+error
 );
 
-}
 
 }
-
-);
 
 
 };

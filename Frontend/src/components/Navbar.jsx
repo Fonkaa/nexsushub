@@ -30,23 +30,50 @@ const [showNotifications,setShowNotifications]=useState(false);
 
 const [search,setSearch]=useState("");
 
-
-
-
-
 useEffect(()=>{
-
 
 fetchProfile();
 
 fetchNotifications();
 
 
+const notificationInterval = setInterval(()=>{
+
+fetchNotifications();
+
+},5000);
+
+
+// Listen for profile update
+const handleProfileUpdate = ()=>{
+
+    fetchProfile();
+
+};
+
+
+window.addEventListener(
+    "profileUpdated",
+    handleProfileUpdate
+);
+
+
+
+return ()=>{
+
+clearInterval(notificationInterval);
+
+
+window.removeEventListener(
+    "profileUpdated",
+    handleProfileUpdate
+);
+
+
+};
+
+
 },[]);
-
-
-
-
 
 // GET UPDATED PROFILE
 
@@ -57,13 +84,19 @@ try{
 const res = await API.get("/profile");
 
 
-setProfile(res.data);
+setProfile({
+    ...res.data,
+    profile_image:
+    res.data.profile_image 
+    ? res.data.profile_image + "?v=" + Date.now()
+    : null
+});
 
 
 }catch(error){
 
 console.log(
-"PROFILE ERROR:",
+"PROFILE ERROR",
 error
 );
 
@@ -81,7 +114,7 @@ const fetchNotifications=async()=>{
 try{
 
 
-const res = await API.get("/notifications");
+ const res = await API.get("/notifications");
 
 
 setNotifications(res.data);
@@ -109,9 +142,7 @@ error
 
 
 const unreadCount = notifications.filter(
-
-(n)=>n.is_read===0
-
+(n)=>!n.is_read
 ).length;
 
 
@@ -127,9 +158,7 @@ try{
 
 
 await API.put(
-
-`/notifications/${id}`
-
+`/notifications/${id}/read`
 );
 
 
@@ -323,8 +352,13 @@ relative
 
 <button
 
-onClick={()=>setShowNotifications(!showNotifications)}
+onClick={()=>{
 
+setShowNotifications(!showNotifications);
+
+fetchNotifications();
+
+}}
 className="
 relative
 text-gray-600
@@ -458,7 +492,7 @@ cursor-pointer
 hover:bg-gray-50
 
 ${
-notification.is_read===0
+!notification.is_read
 
 ?
 
@@ -579,7 +613,7 @@ transition
 
         <img
 
-        src={`http://localhost:5000/uploads/${profile.profile_image}`}
+src={`http://localhost:5000/uploads/${profile.profile_image}`}
 
         className="
         w-full

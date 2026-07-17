@@ -3,7 +3,6 @@ import API from "../api/axios";
 import { useNavigate, Link } from "react-router-dom";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
-
 function Login(){
 
     const navigate = useNavigate();
@@ -50,19 +49,49 @@ console.log("NEW LOGIN COMPONENT LOADED");
             );
 
 
-            localStorage.setItem(
-                "token",
-                res.data.token
-            );
+         console.log("BACKEND TOKEN:", res.data.token);
 
 
-            localStorage.setItem(
-                "user",
-                JSON.stringify(res.data.user)
-            );
+localStorage.setItem(
+    "token",
+    res.data.token
+);
 
 
-            navigate("/dashboard");
+console.log(
+    "LOCAL TOKEN:",
+    localStorage.getItem("token")
+);
+
+
+           localStorage.setItem(
+    "user",
+    JSON.stringify(res.data.user)
+);
+
+console.log("LOGIN USER:", res.data.user);
+
+if(res.data.user.role === "admin"){
+
+    navigate("/dashboard");
+
+}
+else if(res.data.user.role === "employee"){
+
+    if(res.data.user.first_login){
+        navigate("/profile");
+    }
+    else{
+        navigate("/dashboard");
+    }
+
+}
+else if(res.data.user.role === "viewer"){
+
+    navigate("/viewer");
+
+}
+
 
 
         }catch(error){
@@ -246,11 +275,21 @@ Remember me
 
 
 
-<a className="text-indigo-600 hover:underline">
+<Link
 
-Forgot password?
+to="/forgot-password"
 
-</a>
+className="
+text-blue-600
+text-sm
+font-semibold
+"
+
+>
+
+Forgot Password?
+
+</Link>
 
 
 </div>

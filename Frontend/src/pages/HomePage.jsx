@@ -1833,7 +1833,7 @@ employees and administrators.
 
                     <p className="mt-2 text-gray-500 text-sm">
 
-                        Developed as a full-stack Software Engineering project.
+                        Developed as a full-stack Software Engineering project by Abdulbasit Ylkal.
 
                     </p>
 

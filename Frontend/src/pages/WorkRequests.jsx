@@ -240,34 +240,30 @@ console.log(error);
 
 
 
-const assignRequest=async(id,assigned_to)=>{
-
+const assignRequest = async(id, assigned_to)=>{
 
 try{
 
-
 await API.put(
-
-`/requests/assign/${id}`,
-
-{
-assigned_to
-}
-
+    `/requests/assign/${id}`,
+    {
+        assigned_to
+    }
 );
-
 
 
 fetchRequests();
 
 
-
 }catch(error){
 
-console.log(error);
+console.log(
+"ASSIGN ERROR:",
+error
+);
+
 
 }
-
 
 };
 
@@ -350,48 +346,33 @@ return statusMatch && priorityMatch;
 
 return(
 
-
-<div className="
-min-h-screen
-bg-gray-100
-p-6
-">
-
+<div className="min-h-screen bg-gray-100 p-6">
 
 
 {/* HEADER */}
 
-
-<div className="
-flex
-justify-between
-items-center
-mb-8
-">
+<div className="flex flex-col lg:flex-row justify-between gap-6 mb-8">
 
 
-<div className="
-flex
-items-center
-gap-4
-">
+<div className="flex items-center gap-4">
 
 
 <div className="
 w-16
 h-16
 rounded-2xl
-bg-blue-100
+bg-gradient-to-br
+from-blue-600
+to-purple-600
+text-white
 flex
 items-center
 justify-center
-text-blue-600
 text-3xl
+shadow-lg
 ">
 
-
 <FaClipboardList/>
-
 
 </div>
 
@@ -401,7 +382,7 @@ text-3xl
 
 <h1 className="
 text-4xl
-font-bold
+font-black
 text-gray-800
 ">
 
@@ -415,7 +396,7 @@ text-gray-500
 mt-1
 ">
 
-Manage employee requests efficiently
+Monitor, assign and manage employee requests
 
 </p>
 
@@ -429,42 +410,33 @@ Manage employee requests efficiently
 
 
 
+
 <div className="
 bg-white
-shadow-sm
 rounded-2xl
+shadow-lg
 px-6
 py-4
 flex
 items-center
-gap-3
+gap-4
 ">
 
 
 <FaUserShield
-className="text-blue-600"
+className="text-blue-600 text-2xl"
 />
 
 
 <div>
 
-<p className="
-text-xs
-text-gray-500
-">
-
-Role
-
+<p className="text-xs text-gray-400">
+Current Role
 </p>
 
 
-<p className="
-font-bold
-capitalize
-">
-
+<p className="font-bold capitalize">
 {user?.role}
-
 </p>
 
 
@@ -474,18 +446,27 @@ capitalize
 </div>
 
 
-
 </div>
+
+
+
+
+
+
+
+
+
 {/* CREATE REQUEST */}
 
 {
 
-user?.role !== "admin" &&
+user?.role!=="admin" &&
+
 
 <div className="
 bg-white
 rounded-3xl
-shadow-lg
+shadow-xl
 p-8
 mb-8
 ">
@@ -494,27 +475,27 @@ mb-8
 <h2 className="
 text-2xl
 font-bold
-text-gray-800
 mb-6
 flex
-items-center
 gap-3
+items-center
 ">
 
-<FaPlus
-className="text-blue-600"
-/>
 
-Create New Request
+<FaPlus className="text-blue-600"/>
+
+New Work Request
+
 
 </h2>
 
 
 
 
+
 <div className="
 grid
-md:grid-cols-2
+lg:grid-cols-3
 gap-5
 ">
 
@@ -531,16 +512,15 @@ placeholder="Request title"
 
 className="
 border
-rounded-2xl
-p-4
+rounded-xl
+px-4
+py-3
 outline-none
 focus:ring-2
 focus:ring-blue-500
 "
 
 />
-
-
 
 
 
@@ -554,28 +534,24 @@ onChange={handleChange}
 
 className="
 border
-rounded-2xl
-p-4
-outline-none
-focus:ring-2
-focus:ring-blue-500
+rounded-xl
+px-4
+py-3
 "
 
 >
 
 
-<option value="High">
-High Priority
+<option>
+High
 </option>
 
-
-<option value="Medium">
-Medium Priority
+<option>
+Medium
 </option>
 
-
-<option value="Low">
-Low Priority
+<option>
+Low
 </option>
 
 
@@ -583,9 +559,34 @@ Low Priority
 
 
 
+
+
+<button
+
+onClick={createRequest}
+
+className="
+bg-gradient-to-r
+from-blue-600
+to-purple-600
+text-white
+rounded-xl
+font-bold
+hover:scale-105
+transition
+"
+
+>
+
+<FaPlus className="inline mr-2"/>
+
+Submit
+
+</button>
+
+
+
 </div>
-
-
 
 
 
@@ -599,56 +600,21 @@ value={form.description}
 
 onChange={handleChange}
 
-placeholder="Explain your request..."
+placeholder="Describe your request..."
 
 className="
-w-full
 mt-5
+w-full
 border
-rounded-2xl
+rounded-xl
 p-4
-h-32
+h-28
 outline-none
 focus:ring-2
 focus:ring-blue-500
 "
 
 />
-
-
-
-
-
-
-<button
-
-onClick={createRequest}
-
-className="
-mt-5
-flex
-items-center
-gap-3
-bg-gradient-to-r
-from-blue-600
-to-purple-600
-text-white
-px-7
-py-3
-rounded-2xl
-font-semibold
-shadow-lg
-hover:scale-105
-transition
-"
-
->
-
-<FaPlus/>
-
-Submit Request
-
-</button>
 
 
 
@@ -663,14 +629,14 @@ Submit Request
 
 
 
-{/* FILTERS */}
+{/* FILTER */}
 
 
 <div className="
 bg-white
 rounded-3xl
-shadow
-p-6
+shadow-lg
+p-5
 mb-8
 ">
 
@@ -679,27 +645,17 @@ mb-8
 flex
 items-center
 gap-3
-mb-5
+mb-4
 ">
 
+<FaFilter className="text-blue-600"/>
 
-<FaFilter
-className="text-blue-600"
-/>
-
-
-<h2 className="
-text-xl
-font-bold
-">
-
-Filter Requests
-
+<h2 className="font-bold text-xl">
+Filters
 </h2>
 
 
 </div>
-
 
 
 
@@ -715,33 +671,27 @@ gap-5
 
 className="
 border
-rounded-2xl
-p-4
+rounded-xl
+p-3
 "
 
-onChange={(e)=>
-setStatusFilter(e.target.value)
-}
+onChange={(e)=>setStatusFilter(e.target.value)}
 
 >
 
-
-<option value="All">
+<option>
 All Status
 </option>
 
-
-<option value="Pending">
+<option>
 Pending
 </option>
 
-
-<option value="Approved">
+<option>
 Approved
 </option>
 
-
-<option value="Rejected">
+<option>
 Rejected
 </option>
 
@@ -751,39 +701,31 @@ Rejected
 
 
 
-
-
 <select
 
 className="
 border
-rounded-2xl
-p-4
+rounded-xl
+p-3
 "
 
-onChange={(e)=>
-setPriorityFilter(e.target.value)
-}
+onChange={(e)=>setPriorityFilter(e.target.value)}
 
 >
 
-
-<option value="All">
+<option>
 All Priority
 </option>
 
-
-<option value="High">
+<option>
 High
 </option>
 
-
-<option value="Medium">
+<option>
 Medium
 </option>
 
-
-<option value="Low">
+<option>
 Low
 </option>
 
@@ -791,13 +733,11 @@ Low
 </select>
 
 
-</div>
-
-
 
 </div>
 
 
+</div>
 
 
 
@@ -805,7 +745,10 @@ Low
 
 
 
-{/* REQUEST TABLE */}
+
+
+
+{/* TABLE */}
 
 
 
@@ -817,71 +760,71 @@ overflow-hidden
 ">
 
 
-
 <div className="
-overflow-x-auto
+px-6
+py-5
+border-b
 ">
+
+
+<h2 className="
+font-bold
+text-xl
+">
+
+Request Management
+
+
+</h2>
+
+
+</div>
+
+
+
+
+
+<div className="overflow-x-auto">
 
 
 <table className="
 w-full
+text-sm
 ">
 
 
 <thead className="
 bg-gray-50
+text-gray-500
+uppercase
 ">
 
 
 <tr>
 
 
-<th className="
-p-5
-text-left
-">
-
+<th className="px-5 py-4 text-left">
 Request
-
 </th>
 
 
-<th className="
-p-5
-">
-
+<th className="px-5 py-4">
 Priority
-
 </th>
 
 
-
-<th className="
-p-5
-">
-
+<th className="px-5 py-4">
 Status
-
 </th>
 
 
-
-<th className="
-p-5
-">
-
+<th className="px-5 py-4">
 Assigned
-
 </th>
 
 
-
-<th className="
-p-5
-">
-
+<th className="px-5 py-4">
 Actions
-
 </th>
 
 
@@ -889,7 +832,6 @@ Actions
 
 
 </thead>
-
 
 
 
@@ -912,13 +854,13 @@ colSpan="5"
 
 className="
 text-center
-p-12
-text-gray-500
+py-12
+text-gray-400
 "
 
 >
 
-No requests available
+No requests found
 
 </td>
 
@@ -929,8 +871,8 @@ No requests available
 :
 
 
+filteredRequests.map(r=>(
 
-filteredRequests.map((r)=>(
 
 
 <tr
@@ -943,28 +885,28 @@ hover:bg-gray-50
 transition
 "
 
+
+
 >
 
 
-<td className="
-p-5
-">
+<td className="px-5 py-4 max-w-xs">
 
 
-<h3 className="
+<p className="
 font-bold
 text-gray-800
+truncate
 ">
 
 {r.title}
 
-</h3>
+</p>
 
 
 <p className="
-text-sm
 text-gray-500
-mt-1
+truncate
 ">
 
 {r.description}
@@ -980,28 +922,20 @@ mt-1
 
 
 
-
-<td className="
-text-center
-">
+<td className="text-center">
 
 
-<span
-
-className={
+<span className={
 
 `
-px-4
-py-2
+px-3
+py-1
 rounded-full
-text-sm
 font-semibold
 
 ${
 r.priority==="High"
-
 ?
-
 "bg-red-100 text-red-700"
 
 :
@@ -1009,7 +943,6 @@ r.priority==="High"
 r.priority==="Low"
 
 ?
-
 "bg-green-100 text-green-700"
 
 :
@@ -1020,9 +953,7 @@ r.priority==="Low"
 
 `
 
-}
-
->
+}>
 
 
 {r.priority}
@@ -1040,50 +971,20 @@ r.priority==="Low"
 
 
 
-
-<td className="
-text-center
-">
+<td className="text-center">
 
 
-<span
+<span className="
 
-className={
-
-`
-
-px-4
-py-2
+px-3
+py-1
 rounded-full
 font-semibold
-text-sm
 
-${
-r.status==="Approved"
+bg-blue-100
+text-blue-700
 
-?
-
-"bg-green-100 text-green-700"
-
-:
-
-r.status==="Rejected"
-
-?
-
-"bg-red-100 text-red-700"
-
-:
-
-"bg-blue-100 text-blue-700"
-
-}
-
-`
-
-}
-
->
+">
 
 
 {r.status || "Pending"}
@@ -1100,31 +1001,17 @@ r.status==="Rejected"
 
 
 
-
-
-<td className="
-text-center
-font-medium
-text-gray-600
-">
+<td className="text-center">
 
 
 {
+r.assigned_name ||
 
-r.assigned_name
-
-||
-
-<span className="
-text-gray-400
-">
-
+<span className="text-gray-400">
 Not Assigned
-
 </span>
 
 }
-
 
 
 </td>
@@ -1137,8 +1024,14 @@ Not Assigned
 
 
 
-<td className="
-p-5
+<td className="px-5">
+
+
+<div className="
+flex
+items-center
+gap-2
+whitespace-nowrap
 ">
 
 
@@ -1146,77 +1039,50 @@ p-5
 
 user?.role==="admin" &&
 
-
-<div className="
-flex
-flex-wrap
-gap-3
-items-center
-">
-
-
-
+<>
 
 
 <select
 
 className="
 border
-rounded-xl
-px-3
-py-2
-text-sm
+rounded-lg
+px-2
+py-1
+text-xs
 "
 
 onChange={(e)=>{
 
-
-if(e.target.value){
+if(e.target.value)
 
 assignRequest(
 r.id,
 e.target.value
 )
 
-}
-
-
 }}
-
 
 >
 
-
-<option value="">
-
-Assign Member
-
+<option>
+Assign
 </option>
-
 
 
 {
-
 teamMembers.map(member=>(
 
-
 <option
-
 key={member.id}
-
 value={member.id}
-
 >
-
 
 {member.full_name}
 
-
 </option>
 
-
 ))
-
 
 }
 
@@ -1227,48 +1093,24 @@ value={member.id}
 
 
 
-
-
-
-
-{
-
-r.status==="Pending" &&
-
-
-<>
-
-
 <button
 
-onClick={()=>updateStatus(
-r.id,
-"Approved"
-)}
+onClick={()=>updateStatus(r.id,"Approved")}
 
 className="
-flex
-items-center
-gap-2
 bg-green-600
-hover:bg-green-700
 text-white
-px-4
+px-3
 py-2
-rounded-xl
-font-semibold
-transition
+rounded-lg
+hover:bg-green-700
 "
-
 
 >
 
 <FaCheck/>
 
-Approve
-
 </button>
-
 
 
 
@@ -1276,43 +1118,22 @@ Approve
 
 <button
 
-onClick={()=>updateStatus(
-r.id,
-"Rejected"
-)}
+onClick={()=>updateStatus(r.id,"Rejected")}
 
 className="
-flex
-items-center
-gap-2
 bg-red-600
-hover:bg-red-700
 text-white
-px-4
+px-3
 py-2
-rounded-xl
-font-semibold
-transition
+rounded-lg
+hover:bg-red-700
 "
-
 
 >
 
 <FaTimes/>
 
-Reject
-
 </button>
-
-
-</>
-
-
-}
-
-
-
-
 
 
 
@@ -1322,42 +1143,33 @@ Reject
 onClick={()=>deleteRequest(r.id)}
 
 className="
-flex
-items-center
-gap-2
 bg-gray-800
-hover:bg-black
 text-white
-px-4
+px-3
 py-2
-rounded-xl
-font-semibold
-transition
+rounded-lg
+hover:bg-black
 "
-
 
 >
 
-
 <FaTrash/>
-
-Delete
-
 
 </button>
 
 
+
+</>
+
+
+}
 
 
 
 </div>
 
 
-}
-
-
 </td>
-
 
 
 
@@ -1369,7 +1181,6 @@ Delete
 
 
 }
-
 
 
 </tbody>
@@ -1389,9 +1200,7 @@ Delete
 
 
 
-
 </div>
-
 
 );
 

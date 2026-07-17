@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
-
+import { useNavigate } from "react-router-dom";
 import {
     FaCamera,
     FaSave,
@@ -10,17 +10,14 @@ import {
 
 
 function Profile(){
-
-
+const navigate = useNavigate();
 const [profile,setProfile]=useState(null);
 
 const [image,setImage]=useState(null);
-
-const [preview,setPreview]=useState(null);
+const [preview,setPreview]=useState("");
+const [imageVersion,setImageVersion]=useState(Date.now());
 
 const [loading,setLoading]=useState(false);
-
-
 
 const [editForm,setEditForm]=useState({
 
@@ -51,31 +48,23 @@ useEffect(()=>{
 
 
 
-
-
-const fetchProfile=async()=>{
-
+const fetchProfile = async()=>{
 
 try{
 
-
-const res=await API.get("/profile");
+const res = await API.get("/profile");
 
 
 setProfile(res.data);
 
 
-
 setEditForm({
 
-name:res.data.name,
-
-username:res.data.username,
-
-email:res.data.email
+    name:res.data.name,
+    username:res.data.username,
+    email:res.data.email
 
 });
-
 
 
 
@@ -83,20 +72,21 @@ if(res.data.profile_image){
 
 setPreview(
 
-`http://localhost:5000/uploads/${res.data.profile_image}`
+`${import.meta.env.VITE_API_URL}/uploads/${res.data.profile_image}?v=${Date.now()}`
 
 );
 
 }
 
 
-
 }catch(error){
 
-console.log(error);
+console.log(
+"PROFILE FETCH ERROR:",
+error
+);
 
 }
-
 
 };
 
@@ -135,19 +125,21 @@ const file=e.target.files[0];
 
 if(file){
 
+
 setImage(file);
 
 
-setPreview(
-URL.createObjectURL(file)
-);
+const localPreview =
+URL.createObjectURL(file);
+
+
+setPreview(localPreview);
 
 
 }
 
 
 };
-
 
 
 
@@ -169,24 +161,23 @@ try{
 setLoading(true);
 
 
-
-await API.put(
-
+const res = await API.put(
 "/profile",
-
 editForm
-
 );
 
+
+window.dispatchEvent(
+new Event("profileUpdated")
+);
+
+
+await fetchProfile();
 
 
 alert(
 "Profile information updated"
 );
-
-
-
-fetchProfile();
 
 
 
@@ -224,110 +215,140 @@ setLoading(false);
 const uploadImage = async()=>{
 
 
-    if(!image){
+if(!image){
 
-        alert("Please select an image first");
-        return;
+alert("Please select an image first");
+return;
 
-    }
-
-
-    try{
-
-
-        const formData = new FormData();
-
-
-        formData.append(
-            "profile_image",
-            image
-        );
+}
 
 
 
-        const res = await API.put(
+try{
 
-            "/profile/image",
 
-            formData,
+const formData = new FormData();
 
-            {
-                headers:{
-                    "Content-Type":"multipart/form-data"
-                }
-            }
 
-        );
+formData.append(
+"profile_image",
+image
+);
 
 
 
-        console.log(
-            "UPLOAD RESPONSE:",
-            res.data
-        );
+const res = await API.put(
+
+"/profile/image",
+
+formData,
+
+{
+headers:{
+"Content-Type":"multipart/form-data"
+}
+}
+
+);
 
 
 
-        // update local storage user image
-        const oldUser = JSON.parse(
-            localStorage.getItem("user")
-        );
-
-
-        const updatedUser = {
-
-            ...oldUser,
-
-            profile_image: res.data.image
-
-        };
-
-
-        localStorage.setItem(
-
-            "user",
-
-            JSON.stringify(updatedUser)
-
-        );
+console.log(
+"UPLOAD RESPONSE:",
+res.data
+);
 
 
 
-        alert(
-            "Profile picture updated successfully"
-        );
+const newImage =
+res.data.image;
 
 
 
-        setImage(null);
+// update database image state
+
+setProfile(prev=>({
+
+...prev,
+
+profile_image:newImage
+
+}));
 
 
-        fetchProfile();
+
+
+// FORCE IMAGE RELOAD
+
+setImageVersion(Date.now());
 
 
 
-    }catch(error){
+setPreview(
+
+`${import.meta.env.VITE_API_URL}/uploads/${newImage}?v=${Date.now()}`
+
+);
 
 
-        console.log(
-
-            "IMAGE UPLOAD ERROR:",
-
-            error.response?.data || error
-
-        );
 
 
-        alert(
-            "Image upload failed"
-        );
+// update local storage
+
+const oldUser =
+JSON.parse(
+localStorage.getItem("user")
+);
 
 
-    }
+localStorage.setItem(
 
+"user",
+
+JSON.stringify({
+
+...oldUser,
+
+profile_image:newImage
+
+})
+
+);
+
+
+// Notify Navbar immediately
+window.dispatchEvent(
+    new Event("profileUpdated")
+);
+
+
+setImage(null);
+
+
+
+alert(
+"Profile picture updated successfully"
+);
+
+
+
+}catch(error){
+
+
+console.log(
+"IMAGE UPLOAD ERROR:",
+error.response?.data || error
+);
+
+
+alert(
+"Image upload failed"
+);
+
+
+}
 
 };
-
 const changePassword=async(e)=>{
 
 
@@ -353,6 +374,34 @@ alert(
 
 
 
+// Update first login status
+
+const oldUser = JSON.parse(
+    localStorage.getItem("user")
+);
+
+
+
+const updatedUser = {
+
+    ...oldUser,
+
+    first_login:false
+
+};
+
+
+
+localStorage.setItem(
+
+    "user",
+
+    JSON.stringify(updatedUser)
+
+);
+
+
+
 setPasswordForm({
 
 oldPassword:"",
@@ -360,6 +409,12 @@ oldPassword:"",
 newPassword:""
 
 });
+
+
+
+// Go to dashboard
+
+navigate("/dashboard");
 
 
 
@@ -381,36 +436,21 @@ error.response?.data?.message ||
 
 };
 
-
-
-
-
-
-
-
 if(!profile){
-
 
 return(
 
 <div className="flex justify-center items-center h-screen">
 
-<p className="text-xl font-semibold">
-
+<h2 className="text-xl font-bold">
 Loading profile...
-
-</p>
+</h2>
 
 </div>
 
 );
 
-
 }
-
-
-
-
 
 
 return(

@@ -1,25 +1,31 @@
 import db from "../config/db.js";
 
 
-export const globalSearch = (req,res)=>{
+
+export const globalSearch = async(req,res)=>{
+
+
+try{
 
 
 const {q}=req.query;
 
 
+
 if(!q){
 
-    return res.json([]);
+return res.json([]);
 
 }
 
 
 
-const search = `%${q}%`;
+const search=`%${q}%`;
 
 
 
-const sql = `
+const result = await db.query(`
+
 
 SELECT
 
@@ -31,7 +37,7 @@ name AS title,
 
 FROM users
 
-WHERE name LIKE ?
+WHERE name ILIKE $1
 
 
 
@@ -49,7 +55,7 @@ title,
 
 FROM work_requests
 
-WHERE title LIKE ?
+WHERE title ILIKE $1
 
 
 
@@ -67,7 +73,7 @@ name AS title,
 
 FROM resources
 
-WHERE name LIKE ?
+WHERE name ILIKE $1
 
 
 
@@ -85,7 +91,7 @@ full_name AS title,
 
 FROM team_members
 
-WHERE full_name LIKE ?
+WHERE full_name ILIKE $1
 
 
 
@@ -93,34 +99,31 @@ ORDER BY title
 
 LIMIT 30
 
-`;
 
-
-
-
-db.query(
-
-sql,
-
+`,
 [
-search,
-search,
-search,
 search
-],
+]
 
-(err,result)=>{
-
-
-if(err){
-
-console.log(
-"SEARCH ERROR:",
-err
 );
 
 
-return res.status(500).json({
+
+res.json(result.rows);
+
+
+
+}catch(error){
+
+
+console.log(
+"SEARCH ERROR:",
+error
+);
+
+
+
+res.status(500).json({
 
 message:"Search failed"
 
@@ -128,18 +131,6 @@ message:"Search failed"
 
 
 }
-
-
-
-res.json(result);
-
-
-}
-
-
-
-);
-
 
 
 };

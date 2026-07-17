@@ -1,65 +1,133 @@
 import db from "../config/db.js";
 
 
-// GET USER NOTIFICATIONS
+
+// GET ALL USER NOTIFICATIONS
+
+export const getNotifications = async(req,res)=>{
+ console.log("GET NOTIFICATIONS CALLED");
+    console.log("USER:", req.user);
+    try{
+
+        const result = await db.query(
+
+        `
+        SELECT
+
+            notifications.id,
+            notifications.user_id,
+            notifications.sender_id,
+            notifications.message,
+            notifications.type,
+            notifications.is_read,
+            notifications.created_at,
+
+            users.name AS sender_name
+
+        FROM notifications
+
+        LEFT JOIN users
+
+        ON notifications.sender_id = users.id
+
+
+        WHERE notifications.user_id = $1
+
+
+        ORDER BY notifications.created_at DESC
+
+        `,
+
+        [
+            req.user.id
+        ]
+
+        );
+
+
+        res.status(200).json(result.rows);
 
 
 
+    }catch(error){
 
-// MARK AS READ
+console.log("GET NOTIFICATIONS ERROR:", error.message);
 
-export const markAsRead=(req,res)=>{
+return res.status(500).json({
 
+    message:error.message
 
-    const {id}=req.params;
+});
 
-
-    const sql=`
-
-    UPDATE notifications
-
-    SET is_read=true
-
-    WHERE id=?
-
-    `;
-
-
-
-    db.query(
-
-        sql,
-
-        [id],
-
-        (err)=>{
-
-
-            if(err){
-
-                return res.status(500).json({
-
-                    message:"Failed to update notification"
-
-                });
-
-            }
-
-
-            res.json({
-
-                message:"Notification marked as read"
-
-            });
-
-
-        }
-
-    );
-
+}
 
 };
 
+
+
+
+
+
+// MARK NOTIFICATION AS READ
+
+export const markNotificationRead = async(req,res)=>{
+
+    try{
+
+
+        const {id} = req.params;
+
+
+
+        await db.query(
+
+        `
+        UPDATE notifications
+
+        SET is_read = true
+
+        WHERE id = $1
+
+        AND user_id = $2
+
+        `,
+
+        [
+            id,
+            req.user.id
+        ]
+
+        );
+
+
+
+        res.json({
+
+            message:"Notification marked as read"
+
+        });
+
+
+
+    }catch(error){
+
+
+        console.log(
+            "MARK READ ERROR:",
+            error
+        );
+
+
+        res.status(500).json({
+
+            message:"Failed to update notification"
+
+        });
+
+
+    }
+
+};
 
 
 
@@ -69,154 +137,61 @@ export const markAsRead=(req,res)=>{
 
 // DELETE NOTIFICATION
 
-export const deleteNotification=(req,res)=>{
+export const deleteNotification = async(req,res)=>{
 
 
-    const {id}=req.params;
+    try{
 
 
-    db.query(
+        const {id}=req.params;
 
-        `DELETE FROM notifications WHERE id=?`,
 
-        [id],
 
-        (err)=>{
+        await db.query(
 
+        `
+        DELETE FROM notifications
 
-            if(err){
+        WHERE id = $1
 
-                return res.status(500).json({
+        AND user_id = $2
 
-                    message:"Delete failed"
+        `,
 
-                });
+        [
+            id,
+            req.user.id
+        ]
 
-            }
+        );
 
 
-            res.json({
 
-                message:"Notification deleted"
+        res.json({
 
-            });
+            message:"Notification deleted"
 
+        });
 
-        }
 
-    );
 
+    }catch(error){
 
-};
-export const getNotifications=(req,res)=>{
 
+        console.log(
+            "DELETE NOTIFICATION ERROR:",
+            error
+        );
 
-const sql=`
 
-SELECT 
+        res.status(500).json({
 
-notifications.*,
+            message:"Failed to delete notification"
 
-users.name AS sender_name
+        });
 
 
-FROM notifications
-
-
-LEFT JOIN users
-
-ON notifications.sender_id = users.id
-
-
-WHERE notifications.user_id=?
-
-
-ORDER BY notifications.created_at DESC
-
-`;
-
-
-
-db.query(
-
-sql,
-
-[req.user.id],
-
-(err,result)=>{
-
-
-if(err){
-
-return res.status(500).json({
-
-message:"Notification error"
-
-});
-
-}
-
-
-res.json(result);
-
-
-}
-
-);
-
-
-};
-export const markNotificationRead=(req,res)=>{
-
-
-    const {id}=req.params;
-
-
-
-    const sql=`
-
-    UPDATE notifications
-
-    SET is_read=1
-
-    WHERE id=?
-
-    `;
-
-
-
-    db.query(
-
-        sql,
-
-        [id],
-
-        (err)=>{
-
-
-            if(err){
-
-                return res.status(500).json({
-
-                    message:"Update failed"
-
-                });
-
-            }
-
-
-
-            res.json({
-
-                message:"Notification marked as read"
-
-            });
-
-
-        }
-
-
-    );
+    }
 
 
 };

@@ -19,40 +19,56 @@ function Sidebar() {
 
     const [open, setOpen] = useState(false);
 
-    const menuItems = [
+ const menuItems = [
 
-        {
-            name: "Dashboard",
-            path: "/dashboard",
-            icon: <FaHome />
-        },
+{
+name:"Dashboard",
+path:"/dashboard",
+icon:<FaHome/>,
+roles:["admin","employee"]
+},
 
-        {
-            name: "Team Members",
-            path: "/team-members",
-            icon: <FaUsers />,
-            admin: true
-        },
 
-        {
-            name: "Work Requests",
-            path: "/requests",
-            icon: <FaTasks />
-        },
+{
+name:"Home",
+path:"/viewer",
+icon:<FaHome/>,
+roles:["viewer"]
+},
 
-        {
-            name: "Resources",
-            path: "/resources",
-            icon: <FaBoxes />
-        },
 
-        {
-            name: "Statistics",
-            path: "/statistics",
-            icon: <FaChartBar />
-        }
+{
+name:"Team Members",
+path:"/team-members",
+icon:<FaUsers/>,
+roles:["admin"]
+},
 
-    ];
+
+{
+name:"Work Requests",
+path:"/requests",
+icon:<FaTasks/>,
+roles:["admin","employee","viewer"]
+},
+
+
+{
+name:"Resources",
+path:"/resources",
+icon:<FaBoxes/>,
+roles:["admin","employee","viewer"]
+},
+
+
+{
+name:"Statistics",
+path:"/statistics",
+icon:<FaChartBar/>,
+roles:["admin","employee","viewer"]
+}
+
+];
 
     return (
 
@@ -185,13 +201,9 @@ function Sidebar() {
 
                         menuItems
 
-                            .filter(item =>
-
-                                !item.admin ||
-
-                                user?.role === "admin"
-
-                            )
+                          .filter(item =>
+item.roles.includes(user?.role)
+)
 
                             .map(item => (
 
@@ -259,28 +271,54 @@ function Sidebar() {
 
                 <div
 
-                    className="
+className="
+absolute
+bottom-5
+left-5
+right-5
+bg-gray-800
+rounded-2xl
+p-4
+"
 
-                    absolute
-                    bottom-5
-                    px-6
-                    text-sm
-                    text-gray-500
+>
 
-                    "
 
-                >
+<p className="
+text-gray-400
+text-xs
+">
 
-                    Logged in as:
+Logged in as
 
-                    <span className="text-gray-300 ml-2">
+</p>
 
-                        {user?.role}
 
-                    </span>
 
-                </div>
+<h3 className="
+text-white
+font-bold
+mt-1
+">
 
+{user?.name}
+
+</h3>
+
+
+
+<p className="
+text-blue-400
+text-sm
+capitalize
+">
+
+{user?.role}
+
+</p>
+
+
+</div>
             </aside>
 
         </>

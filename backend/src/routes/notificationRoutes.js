@@ -1,48 +1,39 @@
 import express from "express";
 
 import {
-
-getNotifications,
-markNotificationRead
-
+    getNotifications,
+    markNotificationRead,
+    deleteNotification
 } from "../controllers/notificationController.js";
 
-
 import verifyToken from "../middleware/authMiddleware.js";
-
 
 
 const router = express.Router();
 
 
 
-
-
 router.get(
-
-"/",
-
-verifyToken,
-
-getNotifications
-
+    "/",
+    verifyToken,
+    getNotifications
 );
-
-
 
 
 
 router.put(
-
-"/:id",
-
-verifyToken,
-
-markNotificationRead
-
+    "/:id/read",
+    verifyToken,
+    markNotificationRead
 );
 
 
+
+router.delete(
+    "/:id",
+    verifyToken,
+    deleteNotification
+);
 
 
 

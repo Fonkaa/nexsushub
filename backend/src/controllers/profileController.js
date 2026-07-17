@@ -2,269 +2,350 @@ import db from "../config/db.js";
 import bcrypt from "bcrypt";
 
 
-// ==============================
+
+
 // GET PROFILE
-// ==============================
 
-export const getProfile = (req, res) => {
+export const getProfile = async(req,res)=>{
 
-    const userId = req.user.id;
 
-    const sql = `
-        SELECT
-            id,
-            name,
-            username,
-            email,
-            role,
-            created_at,
-            profile_image
-        FROM users
-        WHERE id=?
-    `;
+try{
 
-    db.query(sql, [userId], (err, result) => {
 
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                message: "Database error"
-            });
-        }
+const result = await db.query(`
 
-        if (result.length === 0) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
 
-        res.json(result[0]);
+SELECT
 
-    });
+id,
+name,
+username,
+email,
+role,
+first_login,
+created_at,
+profile_image
+
+
+FROM users
+
+WHERE id=$1
+
+
+`,
+[
+req.user.id
+]
+
+);
+
+
+
+if(result.rows.length===0){
+
+return res.status(404).json({
+
+message:"User not found"
+
+});
+
+}
+
+
+
+res.json(result.rows[0]);
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Database error"
+
+});
+
+
+}
+
 
 };
 
 
 
-// ==============================
-// UPDATE PROFILE INFORMATION
-// ==============================
 
-export const updateProfile = (req, res) => {
 
-    const userId = req.user.id;
 
-    const {
-        name,
-        username,
-        email
-    } = req.body;
 
-    const sql = `
-        UPDATE users
-        SET
-            name=?,
-            username=?,
-            email=?
-        WHERE id=?
-    `;
+// UPDATE PROFILE
 
-    db.query(
 
-        sql,
+export const updateProfile = async(req,res)=>{
 
-        [
-            name,
-            username,
-            email,
-            userId
-        ],
 
-        (err) => {
+try{
 
-            if (err) {
 
-                console.log(err);
+const {
+name,
+username,
+email
+}=req.body;
 
-                return res.status(500).json({
-                    message: "Profile update failed"
-                });
 
-            }
 
-            res.json({
-                message: "Profile updated successfully"
-            });
+await db.query(`
 
-        }
 
-    );
+UPDATE users
+
+SET
+
+name=$1,
+username=$2,
+email=$3
+
+
+WHERE id=$4
+
+
+`,
+[
+name,
+username,
+email,
+req.user.id
+]
+
+);
+
+
+
+res.json({
+
+message:"Profile updated successfully"
+
+});
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Profile update failed"
+
+});
+
+
+}
+
 
 };
 
 
 
-// ==============================
+
+
+
+
 // UPDATE PROFILE IMAGE
-// ==============================
 
-export const updateProfileImage = (req, res) => {
 
-    const userId = req.user.id;
- console.log("FILE:", req.file);
-    if (!req.file) {
+export const updateProfileImage = async(req,res)=>{
 
-        return res.status(400).json({
-            message: "No image selected"
-        });
 
-    }
+try{
 
-    const image = req.file.filename;
 
-    const sql = `
-        UPDATE users
-        SET profile_image=?
-        WHERE id=?
-    `;
+if(!req.file){
 
-    db.query(
+return res.status(400).json({
 
-        sql,
+message:"No image selected"
 
-        [
-            image,
-            userId
-        ],
+});
 
-        (err) => {
+}
 
-            if (err) {
 
-                console.log(err);
 
-                return res.status(500).json({
-                    message: "Image update failed"
-                });
+await db.query(`
 
-            }
 
-            res.json({
+UPDATE users
 
-                message: "Profile image updated successfully",
+SET profile_image=$1
 
-                image
+WHERE id=$2
 
-            });
 
-        }
+`,
+[
+req.file.filename,
+req.user.id
+]
 
-    );
+);
+
+
+
+res.json({
+
+message:"Profile image updated successfully",
+
+image:req.file.filename
+
+});
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Image update failed"
+
+});
+
+
+}
+
 
 };
 
 
 
-// ==============================
+
+
+
+
 // CHANGE PASSWORD
-// ==============================
 
-export const changePassword = (req, res) => {
 
-    const userId = req.user.id;
+export const changePassword = async(req,res)=>{
 
-    const {
-        oldPassword,
-        newPassword
-    } = req.body;
 
-    const sql = `
-        SELECT password
-        FROM users
-        WHERE id=?
-    `;
+try{
 
-    db.query(
 
-        sql,
+const {
+oldPassword,
+newPassword
+}=req.body;
 
-        [userId],
 
-        async (err, result) => {
 
-            if (err) {
+const result = await db.query(`
 
-                console.log(err);
 
-                return res.status(500).json({
-                    message: "Database error"
-                });
+SELECT password
 
-            }
+FROM users
 
-            if (result.length === 0) {
+WHERE id=$1
 
-                return res.status(404).json({
-                    message: "User not found"
-                });
 
-            }
+`,
+[
+req.user.id
+]
 
-            const user = result[0];
+);
 
-            const match = await bcrypt.compare(
-                oldPassword,
-                user.password
-            );
 
-            if (!match) {
 
-                return res.status(400).json({
-                    message: "Current password is incorrect"
-                });
+const user=result.rows[0];
 
-            }
 
-            const hashedPassword = await bcrypt.hash(
-                newPassword,
-                10
-            );
 
-            db.query(
+const match =
+await bcrypt.compare(
+oldPassword,
+user.password
+);
 
-                `
-                UPDATE users
-                SET password=?
-                WHERE id=?
-                `,
 
-                [
-                    hashedPassword,
-                    userId
-                ],
 
-                (err) => {
+if(!match){
 
-                    if (err) {
+return res.status(400).json({
 
-                        console.log(err);
+message:"Current password is incorrect"
 
-                        return res.status(500).json({
-                            message: "Password update failed"
-                        });
+});
 
-                    }
+}
 
-                    res.json({
-                        message: "Password changed successfully"
-                    });
 
-                }
 
-            );
+const hashed =
+await bcrypt.hash(
+newPassword,
+10
+);
 
-        }
 
-    );
+
+await db.query(`
+
+
+UPDATE users
+
+SET
+
+password=$1,
+
+first_login=false
+
+
+WHERE id=$2
+
+
+`,
+[
+hashed,
+req.user.id
+]
+
+);
+
+
+
+res.json({
+
+message:"Password changed successfully"
+
+});
+
+
+
+}catch(error){
+
+
+console.log(error);
+
+
+res.status(500).json({
+
+message:"Password update failed"
+
+});
+
+
+}
+
 
 };

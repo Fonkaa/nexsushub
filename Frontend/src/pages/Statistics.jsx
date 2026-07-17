@@ -19,10 +19,9 @@ const user = JSON.parse(
 );
 
 
-
 const [stats,setStats] = useState(null);
 
-
+const [pieData,setPieData] = useState([]);
 
 useEffect(()=>{
 
@@ -30,14 +29,58 @@ useEffect(()=>{
 
 },[]);
 
+useEffect(()=>{
 
+if(stats){
+
+setPieData([
+
+{
+name:"Pending",
+value:Number(stats.pendingRequests)
+},
+
+{
+name:"Approved",
+value:Number(stats.approvedRequests)
+},
+
+{
+name:"Rejected",
+value:Number(stats.rejectedRequests)
+}
+
+]);
+
+
+console.log(
+"PIE DATA:",
+[
+{
+name:"Pending",
+value:Number(stats.pendingRequests)
+},
+{
+name:"Approved",
+value:Number(stats.approvedRequests)
+},
+{
+name:"Rejected",
+value:Number(stats.rejectedRequests)
+}
+]
+);
+
+
+}
+
+},[stats]);
 
 
 
 const fetchStatistics = async()=>{
 
 try{
-
 
 const response = await API.get(
     "/dashboard/stats"
@@ -49,8 +92,15 @@ console.log(
     response.data
 );
 
+console.log(
+    "AVAILABLE:",
+    response.data.availableResources
+);
 
-
+console.log(
+    "TOTAL:",
+    response.data.totalResources
+);
 setStats(response.data);
 
 
@@ -64,7 +114,6 @@ error.response?.data || error.message
 
 
 }
-
 
 };
 
@@ -340,25 +389,7 @@ height={300}
 
 
 <Pie
-
-data={[
-
-{
-name:"Pending",
-value:stats.pendingRequests
-},
-
-{
-name:"Approved",
-value:stats.approvedRequests
-},
-
-{
-name:"Rejected",
-value:stats.rejectedRequests
-}
-
-]}
+data={pieData}
 
 dataKey="value"
 
@@ -369,11 +400,20 @@ label
 >
 
 
-<Cell fill="#eab308"/>
+{
+pieData.map((item,index)=>(
 
-<Cell fill="#22c55e"/>
+<Cell
+key={index}
+fill={[
+"#eab308",
+"#22c55e",
+"#ef4444"
+][index]}
+/>
 
-<Cell fill="#ef4444"/>
+))
+}
 
 
 </Pie>
@@ -397,16 +437,11 @@ label
 
 
 
-
 <div className="bg-white rounded-2xl shadow p-6">
 
-
 <h2 className="text-xl font-bold mb-5">
-
 Resource Availability
-
 </h2>
-
 
 
 <ResponsiveContainer
@@ -414,29 +449,30 @@ width="100%"
 height={300}
 >
 
-
 <PieChart>
 
 
 <Pie
 
 data={[
-
 {
 name:"Available",
-value:stats.availableResources
+value:Number(stats.availableResources || 0)
 },
 
 {
 name:"Unavailable",
 value:
-stats.totalResources -
-stats.availableResources
+Number(stats.totalResources || 0) -
+Number(stats.availableResources || 0)
 }
 
 ]}
 
 dataKey="value"
+
+cx="50%"
+cy="50%"
 
 outerRadius={100}
 

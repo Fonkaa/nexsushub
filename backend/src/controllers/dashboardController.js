@@ -1,182 +1,120 @@
 import db from "../config/db.js";
 
 
-export const getDashboardStats = (req,res)=>{
+export const getDashboardStats = async(req,res)=>{
 
+try{
 
-    let sql;
-    let params = [];
+let result;
 
 
+if(req.user.role === "admin"){
 
-    // ==========================
-    // ADMIN STATISTICS
-    // ==========================
 
-    if(req.user.role === "admin"){
+result = await db.query(`
 
+SELECT
 
-        sql = `
+(SELECT COUNT(*) 
+ FROM work_requests)
+ AS "totalRequests",
 
-        SELECT
+(SELECT COUNT(*)
+ FROM work_requests
+ WHERE status='Pending')
+ AS "pendingRequests",
 
+(SELECT COUNT(*)
+ FROM work_requests
+ WHERE status='Approved')
+ AS "approvedRequests",
 
-        (SELECT COUNT(*) 
-        FROM work_requests)
-        AS totalRequests,
+(SELECT COUNT(*)
+ FROM work_requests
+ WHERE status='Rejected')
+ AS "rejectedRequests",
 
+(SELECT COUNT(*)
+ FROM resources)
+ AS "totalResources",
 
-        (SELECT COUNT(*) 
-        FROM work_requests 
-        WHERE status='Pending')
-        AS pendingRequests,
+(SELECT COUNT(*)
+ FROM resources
+ WHERE available=true)
+ AS "availableResources",
 
+(SELECT COUNT(*)
+ FROM team_members)
+ AS "totalTeamMembers"
 
-        (SELECT COUNT(*) 
-        FROM work_requests 
-        WHERE status='Approved')
-        AS approvedRequests,
+`);
 
+}
 
-        (SELECT COUNT(*) 
-        FROM work_requests 
-        WHERE status='Rejected')
-        AS rejectedRequests,
 
+else{
 
-        (SELECT COUNT(*)
-        FROM resources)
-        AS totalResources,
 
+result = await db.query(`
 
-        (SELECT COUNT(*)
-        FROM resources
-        WHERE available=1)
-        AS availableResources,
+SELECT
 
 
-        (SELECT COUNT(*)
-        FROM team_members)
-        AS totalTeamMembers
+(SELECT COUNT(*)
+ FROM work_requests
+ WHERE requester_id=$1)
+ AS "totalRequests",
 
 
-        `;
+(SELECT COUNT(*)
+ FROM work_requests
+ WHERE requester_id=$1
+ AND status='Pending')
+ AS "pendingRequests",
 
 
+(SELECT COUNT(*)
+ FROM work_requests
+ WHERE requester_id=$1
+ AND status='Approved')
+ AS "approvedRequests",
 
-    }
 
+(SELECT COUNT(*)
+ FROM work_requests
+ WHERE requester_id=$1
+ AND status='Rejected')
+ AS "rejectedRequests"
 
 
-    // ==========================
-    // EMPLOYEE STATISTICS
-    // ==========================
+`,
+[
+req.user.id
+]);
 
-    else{
 
+}
 
-        sql = `
 
 
-        SELECT
+console.log("DASHBOARD DATA:", result.rows[0]);
 
 
-        (SELECT COUNT(*)
-        FROM work_requests
-        WHERE requester_id=?)
-        AS totalRequests,
+res.json(result.rows[0]);
 
 
+}catch(error){
 
-        (SELECT COUNT(*)
-        FROM work_requests
-        WHERE requester_id=?
-        AND status='Pending')
-        AS pendingRequests,
+console.log("DASHBOARD ERROR:",error);
 
 
+res.status(500).json({
 
-        (SELECT COUNT(*)
-        FROM work_requests
-        WHERE requester_id=?
-        AND status='Approved')
-        AS approvedRequests,
+message:"Failed to load dashboard"
 
+});
 
 
-        (SELECT COUNT(*)
-        FROM work_requests
-        WHERE requester_id=?
-        AND status='Rejected')
-        AS rejectedRequests
-
-
-
-        `;
-
-
-
-        params=[
-
-            req.user.id,
-            req.user.id,
-            req.user.id,
-            req.user.id
-
-        ];
-
-
-    }
-
-
-
-
-
-
-    db.query(
-
-        sql,
-
-        params,
-
-        (err,result)=>{
-
-
-            if(err){
-
-
-                console.log(
-                    "Dashboard stats error:",
-                    err
-                );
-
-
-                return res.status(500).json({
-
-                    message:"Failed to load statistics"
-
-                });
-
-
-            }
-
-
-
-
-            console.log(
-                "STAT RESULT:",
-                result[0]
-            );
-
-
-
-            res.json(result[0]);
-
-
-        }
-
-
-    );
-
+}
 
 };
