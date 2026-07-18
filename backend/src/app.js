@@ -1,58 +1,43 @@
 import express from "express";
+import dotenv from "dotenv";
 import cors from "cors";
-import { getDashboardStats } from "./controllers/dashboardController.js";
 
-import workRequestRoutes from "./routes/workRequestRoutes.js";
+import "./config/db.js";
+
+import searchRoutes from "./routes/searchRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
+import workRequestRoutes from "./routes/workRequestRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
-import profileRoutes from "./routes/profileRoutes.js";   // ✅ add here
-import verifyToken from "./middleware/authMiddleware.js";
-const app = express();
 
+import verifyToken from "./middleware/authMiddleware.js";
+import { getDashboardStats } from "./controllers/dashboardController.js";
+
+dotenv.config();
+
+const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(
-"/uploads",
-express.static("uploads")
-);
 
+app.use("/uploads", express.static("uploads"));
 
-// API Routes
-
+app.use("/api/search", searchRoutes);
 app.use("/api/auth", authRoutes);
-
+app.use("/api/profile", profileRoutes);
 app.use("/api/team", teamRoutes);
-
 app.use("/api/resources", resourceRoutes);
-
 app.use("/api/requests", workRequestRoutes);
-app.use(
-    "/api/profile",
-    profileRoutes
-);
-
-
-
-// Dashboard user information
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/api/dashboard", verifyToken, (req, res) => {
-
     res.json({
-
         message: "Welcome to NexusHub Dashboard",
-
         user: req.user
-
     });
-
 });
-
-
-
-
-// Dashboard statistics
 
 app.get(
     "/api/dashboard/stats",
@@ -60,19 +45,8 @@ app.get(
     getDashboardStats
 );
 
-
-
-
-// Test route
-
 app.get("/", (req, res) => {
-
     res.send("NexusHub Backend Running");
-
 });
-
-
-
-
 
 export default app;
