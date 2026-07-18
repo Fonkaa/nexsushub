@@ -180,20 +180,17 @@ message:"No image selected"
 
 await db.query(`
 
-
 UPDATE users
 
 SET profile_image=$1
 
 WHERE id=$2
 
-
 `,
 [
-req.file.filename,
+req.file.path,
 req.user.id
 ]
-
 );
 
 

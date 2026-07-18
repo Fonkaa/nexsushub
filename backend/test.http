@@ -1,2 +1,5 @@
-GET http://localhost:5000/api/dashboard
-Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImVtcGxveWVlIiwiaWF0IjoxNzgzNjY1MTExLCJleHAiOjE3ODM3NTE1MTF9.MHT0N1U-YLy2DDSKyYkfL13zf76tSdAGQ1Drkf2OQAs
+post https://nexsushub-yoy1-three.vercel.app/api/auth/login
+{
+  "email": "admin@nexushub2026",
+  "password": "Admin@123"
+}

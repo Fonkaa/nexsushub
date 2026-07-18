@@ -1,66 +1,31 @@
 import multer from "multer";
-import path from "path";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../config/cloudinary.js";
 
 
-const storage = multer.diskStorage({
+const storage = new CloudinaryStorage({
 
-    destination:(req,file,cb)=>{
+    cloudinary: cloudinary,
 
-        cb(null,"uploads");
-
-    },
-
-
-    filename:(req,file,cb)=>{
-
-
-        cb(
-            null,
-            Date.now()+"-"+file.originalname
-        );
-
-
+    params: {
+        folder: "nexushub/profile",
+        allowed_formats: [
+            "jpg",
+            "jpeg",
+            "png"
+        ]
     }
-
 
 });
 
 
-
 const upload = multer({
 
-    storage:storage,
+    storage: storage,
 
-    limits:{
-        fileSize:5 * 1024 * 1024
-    },
-
-    fileFilter:(req,file,cb)=>{
-
-
-        const allowed = [
-            "image/jpeg",
-            "image/png",
-            "image/jpg"
-        ];
-
-
-        if(allowed.includes(file.mimetype)){
-
-            cb(null,true);
-
-        }else{
-
-            cb(
-                new Error("Only jpg and png images allowed"),
-                false
-            );
-
-        }
-
-
+    limits: {
+        fileSize: 5 * 1024 * 1024
     }
-
 
 });
 

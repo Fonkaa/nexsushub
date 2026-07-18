@@ -1,14 +1,9 @@
 import axios from "axios";
 
 
-import axios from "axios";
-
 const API = axios.create({
-    baseURL: "https://nexushub.vercel.app/api"
+    baseURL: "https://nexsushub-rffy.vercel.app/api"
 });
-
-export default API;
-
 
 
 API.interceptors.request.use((config)=>{
