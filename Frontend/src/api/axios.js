@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const API = axios.create({
-    baseURL: "https://nexsushub-rffy.vercel.app/api"
+    baseURL: "https://nexsushub-b3uk.vercel.app/api"
 });
 
 

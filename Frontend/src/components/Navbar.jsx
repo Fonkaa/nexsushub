@@ -613,7 +613,7 @@ transition
 
         <img
 
-src={`http://localhost:5000/uploads/${profile.profile_image}`}
+src={profile.profile_image}
 
         className="
         w-full

@@ -71,9 +71,7 @@ setEditForm({
 if(res.data.profile_image){
 
 setPreview(
-
-`${import.meta.env.VITE_API_URL}/uploads/${res.data.profile_image}?v=${Date.now()}`
-
+`${res.data.profile_image}?v=${Date.now()}`
 );
 
 }
@@ -285,9 +283,7 @@ setImageVersion(Date.now());
 
 
 setPreview(
-
-`${import.meta.env.VITE_API_URL}/uploads/${newImage}?v=${Date.now()}`
-
+`${newImage}?v=${Date.now()}`
 );
 
 
