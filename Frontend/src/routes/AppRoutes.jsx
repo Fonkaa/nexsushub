@@ -1,21 +1,26 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Unauthorized from "../pages/Unauthorized";
-import ProtectedRoute from "./ProtectedRoute";
-import Dashboard from "../pages/Dashboard";
-import TeamMembers from "../pages/TeamMembers";
-import WorkRequests from "../pages/WorkRequests";
-import Resources from "../pages/Resources";
-import Statistics from "../pages/Statistics";
-import SearchResults from "../pages/SearchResults";
-import HomePage from "../pages/HomePage";
-import { Register } from "../pages/Register.jsx";
-import MainLayout from "../layouts/MainLayout";
-import Viewer from "../pages/Viewer";
-import Login from "../pages/Login";
-import Profile from "../pages/Profile";
-import ResetPassword from "../pages/ResetPassword";
-import ForgotPassword from "../pages/ForgotPassword";
-import VerifyOTP from "../pages/VerifyOTP";
+
+import Unauthorized from "../pages/Unauthorized.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
+
+import Dashboard from "../pages/Dashboard.jsx";
+import TeamMembers from "../pages/TeamMembers.jsx";
+import WorkRequests from "../pages/WorkRequests.jsx";
+import Resources from "../pages/Resources.jsx";
+import Statistics from "../pages/Statistics.jsx";
+import SearchResults from "../pages/SearchResults.jsx";
+import HomePage from "../pages/HomePage.jsx";
+
+import Register from "../pages/Register.jsx";
+
+import MainLayout from "../layouts/MainLayout.jsx";
+
+import Viewer from "../pages/Viewer.jsx";
+import Login from "../pages/Login.jsx";
+import Profile from "../pages/Profile.jsx";
+import ResetPassword from "../pages/ResetPassword.jsx";
+import ForgotPassword from "../pages/ForgotPassword.jsx";
+import VerifyOTP from "../pages/VerifyOTP.jsx";
 function AppRoutes(){
 
 
